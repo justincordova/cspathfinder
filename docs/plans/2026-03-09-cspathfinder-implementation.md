@@ -4,6 +4,8 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
+> **IMPORTANT:** Commit this plan document after each major task/phase milestone. This ensures plan updates are tracked in git history alongside implementation progress.
+
 **Goal:** Build a web app that helps high school students find and compare the top 100 Computer Science programs across US colleges — with rich filtering/sorting, detailed school pages, and an AI chatbot that can answer questions AND auto-apply filters on the list.
 
 **Architecture:** Static school data loaded at build time from a curated JSON file (sourced from College Scorecard API + Niche.com grades). Server components load data, client components handle interactivity. Chat is a slide-out drawer (not a separate page) powered by Hugging Face Inference API. The AI can return structured filter commands that the frontend auto-applies. Catppuccin Mocha/Latte theme with toggle, Swiss International typography.
