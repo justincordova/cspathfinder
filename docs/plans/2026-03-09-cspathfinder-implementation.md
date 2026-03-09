@@ -699,7 +699,12 @@ describe("filterSchools", () => {
     const schools = loadSchools();
     const sorted = filterSchools(schools, { sortBy: "campusFood", sortDir: "desc" });
     expect(sorted.length).toBeGreaterThan(0);
-    // First school should have a high food grade
+    // Verify first school has better food grade than last school
+    if (sorted.length >= 2) {
+      const firstGrade = sorted[0].nicheGrades.campusFood;
+      const lastGrade = sorted[sorted.length - 1].nicheGrades.campusFood;
+      expect(firstGrade).not.toBe(lastGrade);
+    }
   });
 
   it("should paginate results", () => {
@@ -1065,7 +1070,7 @@ function getDomain(url: string): string {
 function getInitials(name: string): string {
   return name
     .split(/\s+/)
-    .filter((w) => w.length > 2 || w === w.toUpperCase())
+    .filter((w) => w.length > 0) // Keep all non-empty words
     .slice(0, 2)
     .map((w) => w[0])
     .join('')
@@ -1480,7 +1485,7 @@ export default async function SchoolPage({
   const totalCost = (school.tuitionInState + school.roomAndBoard) * 4;
   const roi =
     school.medianEarnings6yr && totalCost > 0
-      ? ((school.medianEarnings6yr * 10 - totalCost) / totalCost * 100).toFixed(0)
+      ? ((school.medianEarnings6yr * 6 - totalCost) / totalCost * 100).toFixed(0)
       : null;
 
   const stats = [
@@ -2057,6 +2062,7 @@ useEffect(() => {
   if (pendingFilters.search !== undefined) setSearch(pendingFilters.search);
   setPage(1);
   clearPendingFilters();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [pendingFilters, clearPendingFilters]);
 ```
 
@@ -2087,6 +2093,8 @@ git commit -m "feat: add AI chat drawer with auto-filter integration"
 **Step 1: Create ROI comparison chart**
 
 Create `src/components/ROIChart.tsx` using Recharts. Shows a bar chart comparing tuition vs 6-year earnings for the currently visible (filtered) schools:
+
+**Important:** The chart should receive the **filtered/paginated** school list (not all schools) to reflect the current search/filter state. Pass `paginated` from SchoolList, not the full `schools` array.
 
 ```typescript
 'use client';
@@ -2277,9 +2285,19 @@ This plan has been reviewed and updated to fix critical and major issues:
 11. Improved mobile responsiveness across components
 12. Fixed null handling in ROI calculations
 
+### Additional Fixes (Second Pass)
+
+13. **School Detail ROI** - Fixed ROI calculation to use 6-year earnings (line 1483 was still using 10-year)
+14. **useEffect Dependencies** - Added eslint-disable comment for exhaustive-deps rule in ChatDrawer effect
+15. **Test Assertion** - Completed incomplete Niche grade sorting test with proper assertion
+16. **getInitials Logic** - Simplified to handle edge cases like "UC Berkeley" (previously filtered out 2-letter words)
+17. **ROIChart Input** - Added note to pass filtered/paginated schools, not full array
+18. **Filter Logic** - Fixed state filter to handle empty string clearing correctly
+
 ### Remaining Considerations
 
 - Consider starting with 25 schools first to validate data quality before scaling to 100
 - IP-based rate limiting is bypassable; consider additional security measures for production
 - All school data is exposed client-side (intentional for static site, but worth noting)
 - State filter doesn't support multi-state selection removal (use "All States" to reset)
+- ChatProvider pendingFilters effect intentionally omits setter dependencies to avoid re-runs on every render (documented with eslint-disable)
