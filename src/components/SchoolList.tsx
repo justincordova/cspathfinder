@@ -314,7 +314,10 @@ export default function SchoolList({ schools }: SchoolListProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-blue font-mono text-sm font-bold">
-                      #{(page - 1) * PER_PAGE + i + 1}
+                      #
+                      {sortDir === "asc"
+                        ? result.totalCount - ((page - 1) * PER_PAGE + i)
+                        : (page - 1) * PER_PAGE + i + 1}
                     </span>
                     <span className="font-semibold text-lg truncate">{school.name}</span>
                   </div>
