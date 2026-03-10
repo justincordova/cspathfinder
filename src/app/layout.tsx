@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import { cn } from "@/utils/cn";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -39,7 +40,8 @@ export default function RootLayout({
           "bg-base text-text font-sans antialiased"
         )}
       >
-        {children}
+        <Navbar />
+        <main className="max-w-[960px] mx-auto px-8">{children}</main>
       </body>
     </html>
   );
