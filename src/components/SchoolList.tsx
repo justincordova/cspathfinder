@@ -141,6 +141,19 @@ export default function SchoolList({ schools }: SchoolListProps) {
     [schools, debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, page]
   );
 
+  // Rank map: slug → stable rank (always desc, so #1 = best)
+  const rankMap = useMemo(() => {
+    const all = filterSchools(schools, {
+      search: debouncedSearch || undefined,
+      state: stateFilter || undefined,
+      region: regionFilter || undefined,
+      sortBy,
+      sortDir: "desc",
+      paginate: false,
+    }) as { schools: School[] };
+    return new Map(all.schools.map((s, i) => [s.slug, i + 1]));
+  }, [schools, debouncedSearch, stateFilter, regionFilter, sortBy]);
+
   const paginated = result.schools;
   const totalPages = result.totalPages;
   const hasActiveFilters = !!(search || stateFilter || regionFilter);
@@ -314,7 +327,7 @@ export default function SchoolList({ schools }: SchoolListProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-blue font-mono text-sm font-bold">
-                      #{(page - 1) * PER_PAGE + i + 1}
+                      #{rankMap.get(school.slug)}
                     </span>
                     <span className="font-semibold text-lg truncate">{school.name}</span>
                   </div>
