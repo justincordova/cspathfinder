@@ -6,6 +6,7 @@ const envSchema = z.object({
   LOG_DIR: z.string().optional(),
   NEXT_PUBLIC_APP_URL: z.url().optional(),
   HF_TOKEN: z.string().min(1).optional(),
+  NEXT_PUBLIC_LOGO_DEV_TOKEN: z.string().min(1).optional(),
 });
 
 function parseEnv() {
