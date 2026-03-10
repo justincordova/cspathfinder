@@ -14,7 +14,7 @@
 
 **Tech Stack:** Next.js 16 (App Router), React 19, Bun, TypeScript strict, Tailwind CSS v4, Zod v4, Vitest, Recharts, Hugging Face Inference API (OpenAI-compatible)
 
-**Note on Zod v4:** This project uses Zod v4 (`"zod": "^4.3.6"`). Import via `import { z } from "zod"`. All schema files must use this import path.
+**Note on Zod v4:** This project uses Zod v4 (`"zod": "^4.3.6"`). The existing codebase imports via `import { z } from "zod/v4"` — use this path everywhere for consistency.
 
 **Architecture Note on Client vs Server Code:** The `filterSchools` utility and related pure functions (sorting, grade conversion) must live in a separate file (`src/lib/data/filters.ts`) that does NOT import `fs`/`path`. Only `loadSchools.ts` should import Node.js modules. Client components (`SchoolList.tsx`) import filtering logic from `filters.ts`, NOT from `loadSchools.ts`.
 
@@ -29,6 +29,82 @@
 1. **Home (`/`)** — Top 100 CS schools list with filters, sorting, pagination (10 per page), and floating chat icon
 2. **School Detail (`/school/[slug]`)** — Individual school page with full stats, Niche grades, charts, and links
 3. **Chat Drawer** (not a page — slide-out panel) — AI chatbot accessible from any page via floating icon
+
+---
+
+## Existing Utilities (`src/lib`)
+
+These utilities already exist in the codebase. **Do not recreate them — use them.**
+
+### Server-side logging — `@/lib/logger`
+
+Winston logger (server-only). Use for all server-side logging: API routes, data loading, errors.
+
+```typescript
+import logger, { childLogger, logError, logHttp } from "@/lib/logger";
+
+// Namespaced child logger (preferred for API routes)
+const log = childLogger("chat"); // adds { service: "chat" } to every entry
+log.info("Request received", { model: MODEL });
+log.debug("Parsed filter block", { filters });
+
+// Structured error logging with stack trace
+logError("HF API failed", err, { model: MODEL, ip });
+
+// HTTP request timing (used inside withHttpLogging)
+logHttp("POST", "/api/chat", 200, 342);
+```
+
+**Frontend logging:** The logger is server-only (`import "server-only"`). In client components use `console.error` / `console.warn` for errors — these are appropriate for browser devtools and error monitoring services.
+
+### Rate limiting — `@/lib/rate-limit`
+
+```typescript
+import { checkRateLimit } from "@/lib/rate-limit";
+
+// Returns a 429 NextResponse if over limit, otherwise null
+const rateLimitResponse = await checkRateLimit(request, {
+  id: "api/chat",
+  limit: 10,
+  windowSecs: 60,
+});
+if (rateLimitResponse) return rateLimitResponse;
+```
+
+Handles IP extraction (X-Forwarded-For, X-Real-IP), Retry-After headers, and X-RateLimit-\* headers automatically.
+
+### HTTP logging wrapper — `@/lib/api-wrapper`
+
+```typescript
+import { withHttpLogging } from "@/lib/api-wrapper";
+
+export async function POST(request: NextRequest) {
+  return withHttpLogging(request, async () => {
+    // ... handler logic
+    return NextResponse.json({ reply });
+  });
+}
+```
+
+Logs method, URL, status code, and duration for every request.
+
+### Error handling — `@/lib/api-error`
+
+```typescript
+import { ApiError, handleApiError } from "@/lib/api-error";
+
+// Throw structured errors from anywhere in the handler
+throw new ApiError(503, "Chat service not configured");
+
+// Catch-all error handler — logs unhandled errors, returns 500
+} catch (err) {
+  return handleApiError(err);
+}
+```
+
+### Environment variables — `@/lib/env`
+
+`src/lib/env.ts` **already exists** with `NODE_ENV`, `LOG_LEVEL`, `LOG_DIR`, and `NEXT_PUBLIC_APP_URL`. Task 0.75 should **update** it (add `HF_TOKEN`) rather than replace it.
 
 ---
 

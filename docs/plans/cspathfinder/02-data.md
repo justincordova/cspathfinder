@@ -82,7 +82,7 @@ Expected: FAIL
 Create `src/lib/data/schema.ts`:
 
 ```typescript
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const NicheGrade = z.enum([
   "A+",

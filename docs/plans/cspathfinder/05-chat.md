@@ -79,21 +79,26 @@ Create `src/app/api/chat/route.ts`:
 ```typescript
 import { NextRequest, NextResponse } from "next/server";
 import { OpenAI } from "openai";
-import { z } from "zod";
-import { RateLimiterMemory } from "rate-limiter-flexible";
+import { z } from "zod/v4";
+import {
+  childLogger,
+  logError,
+  checkRateLimit,
+  withHttpLogging,
+  ApiError,
+  handleApiError,
+} from "@/lib";
 import { loadSchools } from "@/lib/data/loadSchools";
+import { env } from "@/lib/env";
+
+const log = childLogger("chat");
 
 const client = new OpenAI({
   baseURL: "https://router.huggingface.co/v1",
-  apiKey: process.env.HF_TOKEN ?? "",
+  apiKey: env.HF_TOKEN ?? "",
 });
 
 const MODEL = "mistralai/Mistral-Small-24B-Instruct-2501";
-
-const rateLimiter = new RateLimiterMemory({
-  points: 10,
-  duration: 60,
-});
 
 const MessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -148,53 +153,52 @@ ${dataStr}`;
 }
 
 export async function POST(req: NextRequest) {
-  // CSRF protection: verify request originates from our own site
-  const origin = req.headers.get("origin");
-  const host = req.headers.get("host");
-  if (origin && host && !origin.includes(host)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  return withHttpLogging(req, async () => {
+    // CSRF protection: verify request originates from our own site
+    const origin = req.headers.get("origin");
+    const host = req.headers.get("host");
+    if (origin && host && !origin.includes(host)) {
+      throw new ApiError(403, "Forbidden");
+    }
 
-  const ip = req.headers.get("x-forwarded-for") ?? "anonymous";
-  try {
-    await rateLimiter.consume(ip);
-  } catch {
-    return NextResponse.json(
-      { error: "Too many requests. Try again in a minute." },
-      { status: 429 }
-    );
-  }
-
-  if (!process.env.HF_TOKEN) {
-    return NextResponse.json({ error: "Chat service not configured" }, { status: 503 });
-  }
-
-  const body = await req.json();
-  const parsed = ChatRequestSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid request format" }, { status: 400 });
-  }
-
-  const { messages } = parsed.data;
-  const systemPrompt = buildSystemPrompt();
-
-  try {
-    const completion = await client.chat.completions.create({
-      model: MODEL,
-      messages: [{ role: "system", content: systemPrompt }, ...messages],
-      max_tokens: 1024,
+    // Rate limiting — 10 requests per minute per IP
+    const rateLimitResponse = await checkRateLimit(req, {
+      id: "api/chat",
+      limit: 10,
+      windowSecs: 60,
     });
+    if (rateLimitResponse) return rateLimitResponse;
 
-    const reply =
-      completion.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
-    return NextResponse.json({ reply });
-  } catch (err) {
-    console.error("HF API error:", err);
-    return NextResponse.json(
-      { error: "Failed to get a response. Please try again." },
-      { status: 502 }
-    );
-  }
+    if (!env.HF_TOKEN) {
+      throw new ApiError(503, "Chat service not configured");
+    }
+
+    const body = await req.json();
+    const parsed = ChatRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid request format");
+    }
+
+    const { messages } = parsed.data;
+    const systemPrompt = buildSystemPrompt();
+    log.debug("Sending chat request", { messageCount: messages.length, model: MODEL });
+
+    try {
+      const completion = await client.chat.completions.create({
+        model: MODEL,
+        messages: [{ role: "system", content: systemPrompt }, ...messages],
+        max_tokens: 1024,
+      });
+
+      const reply =
+        completion.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
+      log.info("Chat response generated", { model: MODEL, tokens: completion.usage?.total_tokens });
+      return NextResponse.json({ reply });
+    } catch (err) {
+      logError("HF API error", err, { model: MODEL });
+      throw new ApiError(502, "Failed to get a response. Please try again.");
+    }
+  }).catch(handleApiError);
 }
 ```
 

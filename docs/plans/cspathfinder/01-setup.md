@@ -52,30 +52,44 @@ git commit -m "feat: rename project to CSPathFinder and add dependencies"
 
 **Files:**
 
-- Create: `src/lib/env.ts`
+- Modify: `src/lib/env.ts` (already exists — add `HF_TOKEN`)
+- Modify: `next.config.ts`
 
-**Step 1: Create environment variable validation**
+> `src/lib/env.ts` already exists with `NODE_ENV`, `LOG_LEVEL`, `LOG_DIR`, and `NEXT_PUBLIC_APP_URL`. Do NOT replace it — add `HF_TOKEN` to the existing schema.
 
-Create `src/lib/env.ts`:
+**Step 1: Add HF_TOKEN to the existing env schema**
+
+Update `src/lib/env.ts` to add `HF_TOKEN`:
 
 ```typescript
-import "server-only";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  HF_TOKEN: z.string().min(1, "Hugging Face token is required").optional(),
-  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+  LOG_LEVEL: z.enum(["error", "warn", "info", "http", "debug"]).optional(),
+  LOG_DIR: z.string().optional(),
+  NEXT_PUBLIC_APP_URL: z.url().optional(),
+  HF_TOKEN: z.string().min(1).optional(),
 });
 
-export const env = envSchema.parse(process.env);
+function parseEnv() {
+  const result = envSchema.safeParse(process.env);
 
-export type Env = z.infer<typeof envSchema>;
+  if (!result.success) {
+    process.stderr.write("Invalid environment variables:\n");
+    process.stderr.write(z.prettifyError(result.error) + "\n");
+    process.exit(1);
+  }
+
+  return result.data;
+}
+
+export const env = parseEnv();
 ```
 
-**Step 2: Update next.config.ts to use env validation**
+**Step 2: Update next.config.ts**
 
-Update `next.config.ts` to validate environment variables at build time. Note: `@/` aliases don't work in `next.config.ts`, so use a relative import:
+Update `next.config.ts` to validate env at build time and configure Clearbit image domain. Note: `@/` aliases don't work in `next.config.ts`, so use a relative import:
 
 ```typescript
 import "./src/lib/env"; // Side-effect: validates env vars at build time
@@ -96,7 +110,7 @@ export default nextConfig;
 
 ```bash
 git add src/lib/env.ts next.config.ts
-git commit -m "feat: add environment variable validation with Zod"
+git commit -m "feat: add HF_TOKEN to env schema and configure next.config"
 ```
 
 ---
