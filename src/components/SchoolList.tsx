@@ -24,109 +24,23 @@ interface SortOption {
   key: SortField;
   label: string;
   defaultDir: "asc" | "desc";
-  descTitle: string;
-  ascTitle: string;
 }
 
 const SORT_OPTIONS: SortOption[] = [
-  {
-    key: "academics",
-    label: "Academics",
-    defaultDir: "desc",
-    descTitle: "Best Academics",
-    ascTitle: "Worst Academics",
-  },
-  {
-    key: "professors",
-    label: "Professors",
-    defaultDir: "desc",
-    descTitle: "Best Professors",
-    ascTitle: "Worst Professors",
-  },
-  {
-    key: "value",
-    label: "Value",
-    defaultDir: "desc",
-    descTitle: "Best Value",
-    ascTitle: "Worst Value",
-  },
-  {
-    key: "roi",
-    label: "ROI",
-    defaultDir: "desc",
-    descTitle: "Best Payback",
-    ascTitle: "Worst Payback",
-  },
-  {
-    key: "medianEarnings6yr",
-    label: "Earnings",
-    defaultDir: "desc",
-    descTitle: "Highest Earnings",
-    ascTitle: "Lowest Earnings",
-  },
-  {
-    key: "tuitionInState",
-    label: "Tuition",
-    defaultDir: "asc",
-    descTitle: "Most Expensive",
-    ascTitle: "Most Affordable",
-  },
-  {
-    key: "acceptanceRate",
-    label: "Acceptance",
-    defaultDir: "desc",
-    descTitle: "Easiest to Get In",
-    ascTitle: "Hardest to Get In",
-  },
-  {
-    key: "safety",
-    label: "Safety",
-    defaultDir: "desc",
-    descTitle: "Safest Campuses",
-    ascTitle: "Least Safe Campuses",
-  },
-  {
-    key: "campusFood",
-    label: "Food",
-    defaultDir: "desc",
-    descTitle: "Best Campus Food",
-    ascTitle: "Worst Campus Food",
-  },
-  {
-    key: "dorms",
-    label: "Dorms",
-    defaultDir: "desc",
-    descTitle: "Best Dorms",
-    ascTitle: "Worst Dorms",
-  },
-  {
-    key: "studentLife",
-    label: "Social",
-    defaultDir: "desc",
-    descTitle: "Best Social Life",
-    ascTitle: "Worst Social Life",
-  },
-  {
-    key: "partyScene",
-    label: "Party",
-    defaultDir: "desc",
-    descTitle: "Best Party Scene",
-    ascTitle: "Worst Party Scene",
-  },
-  {
-    key: "athletics",
-    label: "Athletics",
-    defaultDir: "desc",
-    descTitle: "Best Athletics",
-    ascTitle: "Worst Athletics",
-  },
-  {
-    key: "diversity",
-    label: "Diversity",
-    defaultDir: "desc",
-    descTitle: "Most Diverse",
-    ascTitle: "Least Diverse",
-  },
+  { key: "academics", label: "Academics", defaultDir: "desc" },
+  { key: "professors", label: "Professors", defaultDir: "desc" },
+  { key: "value", label: "Value", defaultDir: "desc" },
+  { key: "roi", label: "ROI", defaultDir: "desc" },
+  { key: "medianEarnings6yr", label: "Earnings", defaultDir: "desc" },
+  { key: "tuitionInState", label: "Tuition", defaultDir: "asc" },
+  { key: "acceptanceRate", label: "Acceptance", defaultDir: "desc" },
+  { key: "safety", label: "Safety", defaultDir: "desc" },
+  { key: "campusFood", label: "Food", defaultDir: "desc" },
+  { key: "dorms", label: "Dorms", defaultDir: "desc" },
+  { key: "studentLife", label: "Social", defaultDir: "desc" },
+  { key: "partyScene", label: "Party", defaultDir: "desc" },
+  { key: "athletics", label: "Athletics", defaultDir: "desc" },
+  { key: "diversity", label: "Diversity", defaultDir: "desc" },
 ];
 
 const PER_PAGE = 10;
@@ -265,12 +179,6 @@ export default function SchoolList({ schools }: SchoolListProps) {
     [sortBy]
   );
 
-  const sortTitle = useMemo(() => {
-    const option = SORT_OPTIONS.find((o) => o.key === sortBy);
-    if (!option) return null;
-    return sortDir === "desc" ? option.descTitle : option.ascTitle;
-  }, [sortBy, sortDir]);
-
   return (
     <div className="space-y-6">
       {/* Search + dropdowns */}
@@ -341,17 +249,10 @@ export default function SchoolList({ schools }: SchoolListProps) {
         )}
       </div>
 
-      {/* Sort title + results count */}
-      <div className="flex items-baseline justify-between gap-4">
-        {sortTitle && (
-          <h2 className="text-lg font-bold text-text" aria-live="polite">
-            {sortTitle}
-          </h2>
-        )}
-        <p className="text-sm text-subtext0 ml-auto" aria-live="polite" aria-atomic="true">
-          {isFiltering ? "Filtering..." : `${result.totalCount} schools`}
-        </p>
-      </div>
+      {/* Results count */}
+      <p className="text-sm text-subtext0" aria-live="polite" aria-atomic="true">
+        {isFiltering ? "Filtering..." : `${result.totalCount} schools`}
+      </p>
 
       {/* AI filter undo banner */}
       {previousFilters && (
