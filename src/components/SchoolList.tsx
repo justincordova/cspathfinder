@@ -158,17 +158,18 @@ export default function SchoolList({ schools }: SchoolListProps) {
     setPage(1);
   }, []);
 
-  const toggleSort = useCallback((key: SortField) => {
-    setSortBy((prev) => {
-      if (prev === key) {
+  const toggleSort = useCallback(
+    (key: SortField) => {
+      if (sortBy === key) {
         setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-        return prev;
+      } else {
+        setSortBy(key);
+        setSortDir("desc");
       }
-      setSortDir("desc");
-      return key;
-    });
-    setPage(1);
-  }, []);
+      setPage(1);
+    },
+    [sortBy]
+  );
 
   return (
     <div className="space-y-6">
