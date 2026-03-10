@@ -150,8 +150,8 @@ export default function SchoolList({ schools }: SchoolListProps) {
       sortBy,
       sortDir: "desc",
       paginate: false,
-    }) as { schools: School[] };
-    return new Map(all.schools.map((s, i) => [s.slug, i + 1]));
+    }) as School[];
+    return new Map(all.map((s, i) => [s.slug, i + 1]));
   }, [schools, debouncedSearch, stateFilter, regionFilter, sortBy]);
 
   const paginated = result.schools;
