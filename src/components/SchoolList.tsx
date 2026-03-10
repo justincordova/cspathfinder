@@ -27,20 +27,20 @@ interface SortOption {
 }
 
 const SORT_OPTIONS: SortOption[] = [
-  { key: "academics", label: "Academics", defaultDir: "desc" },
-  { key: "professors", label: "Professors", defaultDir: "desc" },
-  { key: "value", label: "Value", defaultDir: "desc" },
-  { key: "roi", label: "ROI", defaultDir: "desc" },
-  { key: "medianEarnings6yr", label: "Earnings", defaultDir: "desc" },
+  { key: "academics", label: "Academics", defaultDir: "asc" },
+  { key: "professors", label: "Professors", defaultDir: "asc" },
+  { key: "value", label: "Value", defaultDir: "asc" },
+  { key: "roi", label: "ROI", defaultDir: "asc" },
+  { key: "medianEarnings6yr", label: "Earnings", defaultDir: "asc" },
   { key: "tuitionInState", label: "Tuition", defaultDir: "asc" },
-  { key: "acceptanceRate", label: "Acceptance", defaultDir: "desc" },
-  { key: "safety", label: "Safety", defaultDir: "desc" },
-  { key: "campusFood", label: "Food", defaultDir: "desc" },
-  { key: "dorms", label: "Dorms", defaultDir: "desc" },
-  { key: "studentLife", label: "Social", defaultDir: "desc" },
-  { key: "partyScene", label: "Party", defaultDir: "desc" },
-  { key: "athletics", label: "Athletics", defaultDir: "desc" },
-  { key: "diversity", label: "Diversity", defaultDir: "desc" },
+  { key: "acceptanceRate", label: "Acceptance", defaultDir: "asc" },
+  { key: "safety", label: "Safety", defaultDir: "asc" },
+  { key: "campusFood", label: "Food", defaultDir: "asc" },
+  { key: "dorms", label: "Dorms", defaultDir: "asc" },
+  { key: "studentLife", label: "Social", defaultDir: "asc" },
+  { key: "partyScene", label: "Party", defaultDir: "asc" },
+  { key: "athletics", label: "Athletics", defaultDir: "asc" },
+  { key: "diversity", label: "Diversity", defaultDir: "asc" },
 ];
 
 const PER_PAGE = 10;

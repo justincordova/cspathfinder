@@ -109,7 +109,9 @@ export function filterSchools(schools: School[], opts: FilterOptions): School[] 
     result.sort((a, b) => {
       const av = getSortValue(a, opts.sortBy!);
       const bv = getSortValue(b, opts.sortBy!);
-      return (av - bv) * dir;
+      if (av !== bv) return (av - bv) * dir;
+      // Tiebreaker: lower US News ranking = better
+      return a.ranking - b.ranking;
     });
   }
 
