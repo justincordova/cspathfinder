@@ -112,15 +112,17 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     setPreviousFilters(null);
   }, [previousFilters]);
 
-  const schools = rankSource === "niche" ? nicheSchools : csrankingsSchools;
+  const schools = (rankSource === "niche" ? nicheSchools : csrankingsSchools).filter(
+    (school) => school.state
+  );
 
   const states = useMemo(() => {
-    const stateSet = new Set(schools.map((school) => school.state));
+    const stateSet = new Set(schools.map((school) => school.state).filter(Boolean));
     return Array.from(stateSet).sort();
   }, [schools]);
 
   const regions = useMemo(() => {
-    const regionSet = new Set(schools.map((school) => school.region));
+    const regionSet = new Set(schools.map((school) => school.region).filter(Boolean));
     return Array.from(regionSet).sort();
   }, [schools]);
 
