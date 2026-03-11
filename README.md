@@ -32,3 +32,23 @@ Find and compare the top Computer Science programs across US colleges.
 ## Live Site
 
 Visit the app at [cspathfinder.vercel.app](https://cspathfinder.vercel.app)
+
+## Data Sources
+
+All data is compiled from multiple sources:
+
+- **CSRankings.org** — CS program rankings based on faculty publications
+- **Niche.com** — 12-category letter grades (scraped from individual school pages)
+- **College Scorecard API** — tuition, earnings, debt, graduation rates
+
+Niche grades and CS rankings are scraped using Playwright and cached at build time for fast loading.
+
+## Tech Stack
+
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS v4 with Catppuccin Mocha/Latte themes
+- **Charts:** Recharts
+- **AI:** Hugging Face Inference API (Qwen 2.5 72B) for the chat assistant
+- **Validation:** Zod v4
+- **Testing:** Vitest, React Testing Library
+- **Runtime:** Bun
