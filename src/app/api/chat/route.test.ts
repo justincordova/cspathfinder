@@ -72,12 +72,23 @@ describe("POST /api/chat", () => {
   });
 
   it("returns 413 when body is too large", async () => {
-    const req = makeRequest(
-      { messages: [{ role: "user", content: "hi" }] },
-      { "content-length": "99999" }
-    );
+    const bigBody = "x".repeat(10001);
+    const req = new NextRequest("http://localhost/api/chat", {
+      method: "POST",
+      body: bigBody,
+      headers: { "content-type": "application/json" },
+    });
     const res = await POST(req);
     expect(res.status).toBe(413);
+  });
+
+  it("accepts application/json with charset parameter", async () => {
+    const req = makeRequest(
+      { messages: [{ role: "user", content: "hello" }] },
+      { "content-type": "application/json; charset=utf-8" }
+    );
+    const res = await POST(req);
+    expect(res.status).not.toBe(415);
   });
 
   it("returns 400 for invalid request body schema", async () => {

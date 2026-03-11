@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filterSchools, type FilterResult } from "@/lib/data/filters";
+import { filterSchools, calculatePaybackYears, type FilterResult } from "@/lib/data/filters";
 import type { School } from "@/lib/data/schema";
 
 const mockSchools: School[] = [
@@ -101,5 +101,84 @@ describe("filterSchools (pure)", () => {
     const result = filterSchools(mockSchools, { search: "NYC" });
     expect(result).toHaveLength(1);
     expect(result[0].slug).toBe("other");
+  });
+
+  it("should sort by ROI descending (best ROI = shortest payback first)", () => {
+    // test-u: (50000+15000)*4 / 100000 = 2.6 years payback
+    // other:  (30000+12000)*4 / 80000  = 2.1 years payback  ← better ROI
+    // ROI is stored as -(payback years); desc sort puts least-negative (best) first
+    const result = filterSchools(mockSchools, { sortBy: "roi", sortDir: "desc" });
+    expect(result[0].slug).toBe("other");
+    expect(result[1].slug).toBe("test-u");
+  });
+
+  it("should sort school with no earnings last when sorting by ROI", () => {
+    const noEarnings: School = {
+      ...mockSchools[0],
+      slug: "no-earnings",
+      name: "No Earnings U",
+      medianEarnings6yr: null,
+    };
+    const result = filterSchools([...mockSchools, noEarnings], { sortBy: "roi", sortDir: "asc" });
+    expect(result[result.length - 1].slug).toBe("no-earnings");
+  });
+
+  it("should not truncate schools when sorting large arrays", () => {
+    const manySchools: School[] = Array.from({ length: 100 }, (_, i) => ({
+      ...mockSchools[0],
+      slug: `school-${i}`,
+      name: `School ${i}`,
+      csRanking: 100 - i,
+    }));
+    const result = filterSchools(manySchools, { sortBy: "csRanking", sortDir: "asc" });
+    expect(result).toHaveLength(100);
+    expect(result[0].csRanking).toBe(1);
+  });
+
+  it("should use rankField for secondary sort", () => {
+    const tied: School[] = [
+      {
+        ...mockSchools[0],
+        slug: "tied-a",
+        name: "Tied A",
+        tuitionInState: 40000,
+        csRanking: 5,
+        nicheRanking: 2,
+      },
+      {
+        ...mockSchools[0],
+        slug: "tied-b",
+        name: "Tied B",
+        tuitionInState: 40000,
+        csRanking: 3,
+        nicheRanking: 8,
+      },
+    ];
+    const result = filterSchools(tied, {
+      sortBy: "tuitionInState",
+      sortDir: "asc",
+      rankField: "csRanking",
+    });
+    // Primary values tie; secondary sort by csRanking ascending → tied-b (#3) before tied-a (#5)
+    expect(result[0].slug).toBe("tied-b");
+    expect(result[1].slug).toBe("tied-a");
+  });
+});
+
+describe("calculatePaybackYears", () => {
+  it("should calculate payback years correctly", () => {
+    const result = calculatePaybackYears(mockSchools[0]);
+    // (50000 + 15000) * 4 / 100000 = 2.6
+    expect(result).toBeCloseTo(2.6);
+  });
+
+  it("should return null when earnings are missing", () => {
+    const school = { ...mockSchools[0], medianEarnings6yr: null };
+    expect(calculatePaybackYears(school)).toBeNull();
+  });
+
+  it("should return null when earnings are zero", () => {
+    const school = { ...mockSchools[0], medianEarnings6yr: 0 };
+    expect(calculatePaybackYears(school)).toBeNull();
   });
 });
