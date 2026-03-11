@@ -193,6 +193,7 @@ export default function ChatDrawer() {
             if (filters.state) params.set("state", filters.state);
             if (filters.region) params.set("region", filters.region);
             if (filters.search) params.set("q", filters.search);
+            if (filters.rankSource) params.set("rank", filters.rankSource);
             router.push(`/?${params.toString()}`);
           }
         }

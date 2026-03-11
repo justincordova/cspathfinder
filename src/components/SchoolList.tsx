@@ -194,12 +194,13 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
 
   const paginated = result.schools;
   const totalPages = result.totalPages;
+  const defaultSortField: SortField = rankSource === "niche" ? "nicheRanking" : "csRanking";
   const hasActiveFilters = !!(
     search ||
     stateFilter ||
     regionFilter ||
     rankSource !== "niche" ||
-    sortBy !== "nicheRanking"
+    sortBy !== defaultSortField
   );
 
   // Show filtering state when debounced search is different from current search

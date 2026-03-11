@@ -38,7 +38,6 @@ const SENSITIVE_KEYS = new Set([
   "secret",
   "apikey",
   "api_key",
-  "apikey",
   "api-key",
   "session",
   "cookie",

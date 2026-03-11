@@ -173,15 +173,22 @@ export async function POST(req: NextRequest) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
+        const abortPromise = new Promise<never>((_, reject) => {
+          const onAbort = () => {
+            controller.signal.removeEventListener("abort", onAbort);
+            reject(new Error("Request timeout"));
+          };
+          controller.signal.addEventListener("abort", onAbort);
+        });
+
         const completion = await Promise.race([
           getClient().chat.completions.create({
             model: MODEL,
             messages: [{ role: "system", content: systemPrompt }, ...messages],
             max_tokens: 1024,
+            signal: controller.signal,
           }),
-          new Promise<never>((_, reject) =>
-            controller.signal.addEventListener("abort", () => reject(new Error("Request timeout")))
-          ),
+          abortPromise,
         ]);
 
         clearTimeout(timeoutId);

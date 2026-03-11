@@ -4,16 +4,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   LOG_LEVEL: z.enum(["error", "warn", "info", "http", "debug"]).optional(),
   LOG_DIR: z.string().optional(),
-  NEXT_PUBLIC_APP_URL: z
-    .string()
-    .url()
-    .optional()
-    .or(
-      z
-        .string()
-        .url()
-        .transform(() => undefined)
-    ),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   HF_TOKEN: z.string().min(1).optional(),
   NEXT_PUBLIC_LOGO_DEV_TOKEN: z.string().min(1).optional(),
 });
