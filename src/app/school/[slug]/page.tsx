@@ -1,13 +1,15 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { loadSchools, getSchoolBySlug } from "@/lib/data/loadSchools";
+import { loadSchoolsBySource, getSchoolBySlug } from "@/lib/data/loadSchools";
 import GradeBadge from "@/components/GradeBadge";
 import SchoolLogo from "@/components/SchoolLogo";
 import type { Metadata } from "next";
 import type { NicheGrades, NicheGradeType } from "@/lib/data/schema";
 
 export async function generateStaticParams() {
-  return loadSchools().map((s) => ({ slug: s.slug }));
+  const all = [...loadSchoolsBySource("csrankings"), ...loadSchoolsBySource("niche")];
+  const unique = [...new Map(all.map((s) => [s.slug, s])).values()];
+  return unique.map((s) => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({
@@ -53,18 +55,21 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
   const school = getSchoolBySlug(slug);
   if (!school) notFound();
 
-  const totalCost = (school.tuitionInState + school.roomAndBoard) * 4;
+  const totalCostInState = (school.tuitionInState + school.roomAndBoard) * 4;
+  const totalCostOutOfState = (school.tuitionOutOfState + school.roomAndBoard) * 4;
   const paybackYears =
-    school.medianEarnings6yr && totalCost > 0
-      ? (totalCost / school.medianEarnings6yr).toFixed(1)
+    school.medianEarnings6yr && totalCostInState > 0
+      ? (totalCostInState / school.medianEarnings6yr).toFixed(1)
       : null;
 
   const stats = [
-    { label: "CS Ranking", value: school.csRanking ? `#${school.csRanking}` : "—" },
+    { label: "CSRankings", value: school.csRanking ? `#${school.csRanking}` : "N/A" },
+    { label: "Niche CS", value: school.nicheRanking ? `#${school.nicheRanking}` : "N/A" },
     { label: "In-State Tuition", value: formatCurrency(school.tuitionInState) },
     { label: "Out-of-State Tuition", value: formatCurrency(school.tuitionOutOfState) },
     { label: "Room & Board", value: formatCurrency(school.roomAndBoard) },
-    { label: "Total 4-Year Cost (In-State)", value: formatCurrency(totalCost) },
+    { label: "Total 4-Year Cost (In-State)", value: formatCurrency(totalCostInState) },
+    { label: "Total 4-Year Cost (Out-of-State)", value: formatCurrency(totalCostOutOfState) },
     { label: "Acceptance Rate", value: formatPercent(school.acceptanceRate) },
     { label: "Graduation Rate", value: formatPercent(school.graduationRate) },
     { label: "Enrollment", value: school.enrollment.toLocaleString() },

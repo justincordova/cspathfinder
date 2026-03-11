@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { loadSchools } from "@/lib/data/loadSchools";
+import { loadSchoolsBySource } from "@/lib/data/loadSchools";
 import SchoolList from "@/components/SchoolList";
 import { SchoolCardSkeleton } from "@/components/LoadingSkeleton";
 
@@ -14,7 +14,8 @@ function SchoolListFallback() {
 }
 
 export default function HomePage() {
-  const schools = loadSchools();
+  const csrankingsSchools = loadSchoolsBySource("csrankings");
+  const nicheSchools = loadSchoolsBySource("niche");
 
   return (
     <div id="main-content" className="py-12">
@@ -25,7 +26,7 @@ export default function HomePage() {
         </p>
       </div>
       <Suspense fallback={<SchoolListFallback />}>
-        <SchoolList schools={schools} />
+        <SchoolList csrankingsSchools={csrankingsSchools} nicheSchools={nicheSchools} />
       </Suspense>
     </div>
   );

@@ -17,7 +17,8 @@ const ROIChart = dynamic(() => import("./ROIChart"), { ssr: false });
 import { filterSchools, type SortField, type FilterResult } from "@/lib/data/filters";
 
 interface SchoolListProps {
-  schools: School[];
+  csrankingsSchools: School[];
+  nicheSchools: School[];
 }
 
 interface SortOption {
@@ -26,36 +27,48 @@ interface SortOption {
   defaultDir: "asc" | "desc";
 }
 
-const SORT_OPTIONS: SortOption[] = [
-  { value: "csRanking", label: "Overall", defaultDir: "asc" },
-  { value: "roi", label: "ROI", defaultDir: "asc" },
-  { value: "earnings", label: "Earnings", defaultDir: "desc" },
-  { value: "tuitionInState", label: "Tuition", defaultDir: "asc" },
-  { value: "acceptanceRate", label: "Acceptance", defaultDir: "asc" },
-];
+type RankSource = "csrankings" | "niche";
+
+function getSortOptions(rankSource: RankSource): SortOption[] {
+  const rankField: SortField = rankSource === "niche" ? "nicheRanking" : "csRanking";
+  return [
+    { value: rankField, label: "Overall", defaultDir: "asc" },
+    { value: "roi", label: "ROI", defaultDir: "asc" },
+    { value: "earnings", label: "Earnings", defaultDir: "desc" },
+    { value: "tuitionInState", label: "Tuition", defaultDir: "asc" },
+    { value: "acceptanceRate", label: "Acceptance", defaultDir: "asc" },
+  ];
+}
 
 const PER_PAGE = 10;
 
-export default function SchoolList({ schools }: SchoolListProps) {
+export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolListProps) {
   const searchParams = useSearchParams();
 
   // Initialize state from URL search params (enables shareable/bookmarkable URLs)
+  const [rankSource, setRankSource] = useState<RankSource>(() => {
+    const param = searchParams.get("rank");
+    return param === "csrankings" ? "csrankings" : "niche";
+  });
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [stateFilter, setStateFilter] = useState(searchParams.get("state") ?? "");
   const [regionFilter, setRegionFilter] = useState(searchParams.get("region") ?? "");
   const [sortBy, setSortBy] = useState<SortField>(() => {
     const param = searchParams.get("sort");
-    if (!param || param === "ranking") return "csRanking";
+    if (!param || param === "ranking") return "nicheRanking";
     return param as SortField;
   });
   const [sortDir, setSortDir] = useState<"asc" | "desc">(() => {
     if (searchParams.get("dir")) return searchParams.get("dir") as "asc" | "desc";
     const defaultSort = (searchParams.get("sort") as SortField) ?? "csRanking";
-    return SORT_OPTIONS.find((o) => o.value === defaultSort)?.defaultDir ?? "asc";
+    return getSortOptions("niche").find((o) => o.value === defaultSort)?.defaultDir ?? "asc";
   });
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [isFiltering, setIsFiltering] = useState(false);
   const [showChart, setShowChart] = useState(false);
+
+  const activeRankField: SortField = rankSource === "niche" ? "nicheRanking" : "csRanking";
+  const sortOptions = useMemo(() => getSortOptions(rankSource), [rankSource]);
 
   const { pendingFilters, clearPendingFilters } = useChatContext();
   const [previousFilters, setPreviousFilters] = useState<{
@@ -91,6 +104,8 @@ export default function SchoolList({ schools }: SchoolListProps) {
     setPreviousFilters(null);
   }, [previousFilters]);
 
+  const schools = rankSource === "niche" ? nicheSchools : csrankingsSchools;
+
   const states = useMemo(() => {
     const stateSet = new Set(schools.map((school) => school.state));
     return Array.from(stateSet).sort();
@@ -110,14 +125,24 @@ export default function SchoolList({ schools }: SchoolListProps) {
     if (debouncedSearch) params.set("q", debouncedSearch);
     if (stateFilter) params.set("state", stateFilter);
     if (regionFilter) params.set("region", regionFilter);
-    if (sortBy !== "csRanking") params.set("sort", sortBy);
+    if (rankSource !== "niche") params.set("rank", rankSource);
+    if (sortBy !== activeRankField) params.set("sort", sortBy);
     if (sortDir !== "asc") params.set("dir", sortDir);
     if (page > 1) params.set("page", String(page));
 
     const paramString = params.toString();
     const newUrl = paramString ? `/?${paramString}` : "/";
     window.history.replaceState(null, "", newUrl);
-  }, [debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, page]);
+  }, [
+    debouncedSearch,
+    stateFilter,
+    regionFilter,
+    rankSource,
+    activeRankField,
+    sortBy,
+    sortDir,
+    page,
+  ]);
 
   const result = useMemo(
     () =>
@@ -127,11 +152,12 @@ export default function SchoolList({ schools }: SchoolListProps) {
         region: regionFilter || undefined,
         sortBy,
         sortDir,
+        rankField: activeRankField as "csRanking" | "nicheRanking",
         page,
         perPage: PER_PAGE,
         paginate: true,
       }) as FilterResult,
-    [schools, debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, page]
+    [schools, debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, activeRankField, page]
   );
 
   const paginated = result.schools;
@@ -149,10 +175,22 @@ export default function SchoolList({ schools }: SchoolListProps) {
     setPage(1);
   };
 
+  const handleRankSourceChange = useCallback(
+    (source: RankSource) => {
+      const oldField = rankSource === "niche" ? "nicheRanking" : "csRanking";
+      const newField = source === "niche" ? "nicheRanking" : "csRanking";
+      setRankSource(source);
+      if (sortBy === oldField) setSortBy(newField);
+      setPage(1);
+    },
+    [rankSource, sortBy]
+  );
+
   const clearAllFilters = useCallback(() => {
     setSearch("");
     setStateFilter("");
     setRegionFilter("");
+    setRankSource("csrankings");
     setSortBy("csRanking");
     setSortDir("asc");
     setPage(1);
@@ -163,13 +201,13 @@ export default function SchoolList({ schools }: SchoolListProps) {
       if (sortBy === key) {
         setSortDir((d) => (d === "asc" ? "desc" : "asc"));
       } else {
-        const option = SORT_OPTIONS.find((o) => o.value === key);
+        const option = sortOptions.find((o) => o.value === key);
         setSortBy(key);
         setSortDir(option?.defaultDir ?? "desc");
       }
       setPage(1);
     },
-    [sortBy]
+    [sortBy, sortOptions]
   );
 
   return (
@@ -212,11 +250,32 @@ export default function SchoolList({ schools }: SchoolListProps) {
         </select>
       </div>
 
+      {/* Ranking source toggle */}
+      <div className="flex items-center gap-1 text-sm">
+        <span className="text-subtext0 font-medium mr-1">Ranking:</span>
+        <div className="inline-flex rounded-lg border border-surface0 overflow-hidden">
+          {(["niche", "csrankings"] as const).map((src) => (
+            <button
+              key={src}
+              onClick={() => handleRankSourceChange(src)}
+              className={`px-3 py-1 text-xs font-medium transition-colors ${
+                rankSource === src
+                  ? "bg-blue text-base"
+                  : "bg-mantle text-subtext0 hover:bg-surface0"
+              }`}
+              aria-label={`Use ${src === "csrankings" ? "CSRankings" : "Niche"} rankings`}
+            >
+              {src === "csrankings" ? "CSRankings" : "Niche"}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Sort pills */}
       <div className="flex items-start gap-2 flex-wrap text-sm">
         <span className="text-subtext0 font-medium py-0.5 shrink-0">Sort:</span>
         <div className="flex flex-wrap gap-1.5">
-          {SORT_OPTIONS.map(({ value: key, label }) => (
+          {sortOptions.map(({ value: key, label }) => (
             <button
               key={key}
               onClick={() => toggleSort(key)}
@@ -307,7 +366,7 @@ export default function SchoolList({ schools }: SchoolListProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-blue font-mono text-sm font-bold">
-                      {school.csRanking ? `#${school.csRanking}` : "—"}
+                      {school[activeRankField] ? `#${school[activeRankField]}` : "—"}
                     </span>
                     <span className="font-semibold text-lg truncate">{school.name}</span>
                   </div>
@@ -338,6 +397,12 @@ export default function SchoolList({ schools }: SchoolListProps) {
                   <div>
                     <span className="text-subtext0">In-state: </span>
                     <span className="font-medium">${school.tuitionInState.toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-subtext0">Out-of-state: </span>
+                    <span className="font-medium">
+                      ${school.tuitionOutOfState.toLocaleString()}
+                    </span>
                   </div>
                   <div>
                     <span className="text-subtext0">Earnings: </span>

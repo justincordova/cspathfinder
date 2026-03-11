@@ -38,15 +38,17 @@ export default function ROIChart({ schools }: ROIChartProps) {
   }
 
   return (
-    <div className="w-full h-[400px]">
+    <div className="w-full h-[480px]">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--ctp-surface1)" />
           <XAxis
             dataKey="name"
             angle={-45}
             textAnchor="end"
-            tick={{ fontSize: 11, fill: "var(--ctp-subtext0)" }}
+            interval={0}
+            height={100}
+            tick={{ fontSize: 10, fill: "var(--ctp-subtext0)" }}
           />
           <YAxis
             tick={{ fill: "var(--ctp-subtext0)" }}
@@ -60,7 +62,7 @@ export default function ROIChart({ schools }: ROIChartProps) {
             }}
             formatter={(value: number) => [`$${value.toLocaleString()}`, ""]}
           />
-          <Legend />
+          <Legend verticalAlign="top" height={36} />
           <Bar dataKey="tuition" name="In-State Tuition" fill="var(--ctp-peach)" />
           <Bar dataKey="earnings" name="Median Earnings (6yr)" fill="var(--ctp-green)" />
         </BarChart>

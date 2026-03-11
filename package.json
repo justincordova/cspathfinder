@@ -14,7 +14,9 @@
     "test:coverage": "vitest run --coverage",
     "prepare": "husky",
     "scrape:niche": "bunx playwright install chromium && bun run scripts/scrape-niche-rankings.ts",
-    "scrape:csrankings": "bunx playwright install chromium && bun run scripts/scrape-csrankings.ts"
+    "scrape:csrankings": "bunx playwright install chromium && bun run scripts/scrape-csrankings.ts",
+    "scrape:usnews": "bunx playwright install chromium && bun run scripts/scrape-usnews-cs.ts",
+    "scrape:niche-cs": "bunx playwright install chromium && bun run scripts/scrape-niche-cs.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
