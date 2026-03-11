@@ -389,7 +389,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
                   </p>
                   {/* Mobile: compact stats inline */}
                   <div className="sm:hidden flex gap-3 text-xs text-subtext0 mt-1">
-                    <span>${school.tuitionInState.toLocaleString()}</span>
+                    <span>Tuition: ${school.tuitionInState.toLocaleString()}</span>
                     <span className="text-green">
                       {school.medianEarnings6yr
                         ? `$${school.medianEarnings6yr.toLocaleString()}`
