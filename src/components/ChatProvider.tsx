@@ -8,6 +8,7 @@ export interface ChatFilters {
   state?: string;
   region?: string;
   search?: string;
+  rankSource?: "csrankings" | "niche";
 }
 
 export interface ChatContextType {

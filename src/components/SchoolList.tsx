@@ -94,9 +94,21 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     currentFiltersRef.current = { search, stateFilter, regionFilter, sortBy, sortDir, page };
   }, [search, stateFilter, regionFilter, sortBy, sortDir, page]);
 
+  const handleRankSourceChange = useCallback(
+    (source: RankSource) => {
+      const oldField = rankSource === "niche" ? "nicheRanking" : "csRanking";
+      const newField = source === "niche" ? "nicheRanking" : "csRanking";
+      setRankSource(source);
+      if (sortBy === oldField) setSortBy(newField);
+      setPage(1);
+    },
+    [rankSource, sortBy]
+  );
+
   useEffect(() => {
     if (!pendingFilters) return;
     setPreviousFilters({ ...currentFiltersRef.current });
+    if (pendingFilters.rankSource) handleRankSourceChange(pendingFilters.rankSource);
     if (pendingFilters.sortBy) setSortBy(pendingFilters.sortBy as SortField);
     if (pendingFilters.sortDir) setSortDir(pendingFilters.sortDir);
     if (pendingFilters.state !== undefined) setStateFilter(pendingFilters.state);
@@ -104,7 +116,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     if (pendingFilters.search !== undefined) setSearch(pendingFilters.search);
     setPage(1);
     clearPendingFilters();
-  }, [pendingFilters, clearPendingFilters]);
+  }, [pendingFilters, clearPendingFilters, handleRankSourceChange]);
 
   const undoChatFilters = useCallback(() => {
     if (!previousFilters) return;
@@ -215,17 +227,6 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       setPage(1);
     },
     []
-  );
-
-  const handleRankSourceChange = useCallback(
-    (source: RankSource) => {
-      const oldField = rankSource === "niche" ? "nicheRanking" : "csRanking";
-      const newField = source === "niche" ? "nicheRanking" : "csRanking";
-      setRankSource(source);
-      if (sortBy === oldField) setSortBy(newField);
-      setPage(1);
-    },
-    [rankSource, sortBy]
   );
 
   const clearAllFilters = useCallback(() => {
