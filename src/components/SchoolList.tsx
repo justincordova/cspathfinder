@@ -252,6 +252,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
           </select>
           <svg
             className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-4 h-4 text-subtext0"
+            viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -275,6 +276,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
           </select>
           <svg
             className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-4 h-4 text-subtext0"
+            viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
