@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"latte" | "mocha">(() => {
-    if (typeof window === "undefined") return "latte";
-    const current = document.documentElement.getAttribute("data-theme");
-    return current === "mocha" ? "mocha" : "latte";
-  });
+  const [theme, setTheme] = useState<"latte" | "mocha">("mocha");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme") as "latte" | "mocha" | null;
+    if (saved && saved !== "mocha") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTheme(saved);
+    }
+  }, []);
 
   const toggle = () => {
     const next = theme === "latte" ? "mocha" : "latte";
