@@ -34,6 +34,16 @@ export const resourceCategories = [
         url: "https://docs.github.com",
         description: "Git and GitHub documentation",
       },
+      {
+        name: "Coursera",
+        url: "https://www.coursera.org",
+        description: "College-level courses for skill-building",
+      },
+      {
+        name: "edX",
+        url: "https://www.edx.org",
+        description: "College-level courses from top universities",
+      },
     ],
   },
   {
@@ -75,9 +85,14 @@ export const resourceCategories = [
         description: "Salary data by company and location",
       },
       {
-        name: "Coursera",
-        url: "https://www.coursera.org",
-        description: "College-level courses for skill-building",
+        name: "Handshake",
+        url: "https://joinhandshake.com",
+        description: "Job and internship platform for college students",
+      },
+      {
+        name: "Jobright AI",
+        url: "https://jobright.ai",
+        description: "AI-powered job matching and application assistance",
       },
     ],
   },
@@ -123,6 +138,66 @@ export const resourceCategories = [
         name: "Bolt",
         url: "https://bolt.new",
         description: "AI web app builder for rapid prototyping",
+      },
+      {
+        name: "GitHub Copilot",
+        url: "https://github.com/features/copilot",
+        description: "AI-powered coding assistant integrated into IDEs",
+      },
+      {
+        name: "Cursor",
+        url: "https://cursor.sh",
+        description: "AI-native code editor for faster development",
+      },
+      {
+        name: "Windsurf",
+        url: "https://windsurf.ai",
+        description: "AI code editor with intelligent code completion",
+      },
+      {
+        name: "v0.dev",
+        url: "https://v0.dev",
+        description: "Vercel's AI UI generator for rapid prototyping",
+      },
+      {
+        name: "Midjourney",
+        url: "https://midjourney.com",
+        description: "AI image generation for creative projects",
+      },
+      {
+        name: "DALL-E",
+        url: "https://openai.com/dall-e-3",
+        description: "OpenAI's text-to-image AI generator",
+      },
+      {
+        name: "Notion AI",
+        url: "https://notion.so/product/ai",
+        description: "AI-powered productivity and note-taking",
+      },
+      {
+        name: "Suno",
+        url: "https://suno.ai",
+        description: "AI music generation for creative projects",
+      },
+      {
+        name: "ElevenLabs",
+        url: "https://elevenlabs.io",
+        description: "AI voice generation and text-to-speech",
+      },
+      {
+        name: "Runway",
+        url: "https://runwayml.com",
+        description: "AI video generation and editing tools",
+      },
+      {
+        name: "Jasper",
+        url: "https://jasper.ai",
+        description: "AI writing assistant for marketing and content",
+      },
+      {
+        name: "Copy.ai",
+        url: "https://copy.ai",
+        description: "AI copywriting tool for marketing copy",
       },
     ],
   },
