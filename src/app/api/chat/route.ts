@@ -66,7 +66,7 @@ function buildSystemPrompt(): string {
     schools = [];
   }
   const totalCount = schools.length;
-  const schoolsForPrompt = schools.slice(0, 30);
+  const schoolsForPrompt = schools.slice(0, 60);
   const dataStr = schoolsForPrompt
     .map((s) => {
       const formatCurrency = (val: number | null | undefined) =>
@@ -77,7 +77,7 @@ function buildSystemPrompt(): string {
     })
     .join("\n");
 
-  const prompt = `You are CSPathFinder AI. Help students find CS programs. Data on ${totalCount} schools.
+  const prompt = `You are CSPathFinder AI. Help students find CS programs. You have detailed data on ${schoolsForPrompt.length} schools below (out of ${totalCount} total). For schools not in this list, say you don't have detailed data and point to Niche.com or College Scorecard.
 
 RULES:
 - Be brief. 2-4 sentences max. No bullet lists of stats — the app already shows those.
@@ -90,14 +90,13 @@ RULES:
 - rankSource: "csrankings" (default) or "niche" — sets which ranking source the UI uses
 - filter fields: state ("CA", "NJ"), region ("Northeast"), search (name match)
 - Do NOT list out stats — the user can see them in the app. Just answer the question conversationally.
-- If you don't have the data, say so briefly and point to Niche.com or College Scorecard.
 
 Examples:
 - "Best food?" → "**UCLA** and **UVA** top the food rankings." + filter block
 - "Cheapest in CA?" → "**UC Berkeley** and **UCLA** are the most affordable in-state." + filter block
 - "Best NJ school?" → "**Princeton** is the top-ranked CS program in New Jersey at #10." + filter block
 
-School data (top 30):
+School data (top ${schoolsForPrompt.length}):
 ${dataStr}`;
 
   cachedSystemPrompt = prompt;
@@ -127,16 +126,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const contentLengthHeader = req.headers.get("content-length");
-    if (contentLengthHeader !== null) {
-      const contentLength = Number(contentLengthHeader);
-      if (isNaN(contentLength) || contentLength > 10000) {
-        throw new ApiError(413, "Request body too large");
-      }
-    }
-
     const contentType = req.headers.get("content-type");
-    if (contentType !== "application/json") {
+    if (!contentType?.startsWith("application/json")) {
       throw new ApiError(415, "Content-Type must be application/json");
     }
 
@@ -153,8 +144,12 @@ export async function POST(req: NextRequest) {
       if (rawBody.length === 0) {
         throw new ApiError(400, "Request body cannot be empty");
       }
+      if (rawBody.length > 10000) {
+        throw new ApiError(413, "Request body too large");
+      }
       body = JSON.parse(rawBody);
-    } catch {
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
       throw new ApiError(400, "Invalid JSON body");
     }
 

@@ -56,15 +56,20 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
   const [sortBy, setSortBy] = useState<SortField>(() => {
     const param = searchParams.get("sort");
     const src = searchParams.get("rank") === "csrankings" ? "csrankings" : "niche";
-    if (!param || param === "ranking") return src === "niche" ? "nicheRanking" : "csRanking";
-    return param as SortField;
+    const defaultField: SortField = src === "niche" ? "nicheRanking" : "csRanking";
+    if (!param || param === "ranking") return defaultField;
+    const allOptions = getSortOptions(src);
+    const match = allOptions.find((o) => o.value === param);
+    return match ? match.value : defaultField;
   });
   const [sortDir, setSortDir] = useState<"asc" | "desc">(() => {
-    if (searchParams.get("dir")) return searchParams.get("dir") as "asc" | "desc";
+    const dir = searchParams.get("dir");
+    if (dir === "asc" || dir === "desc") return dir;
     const src = searchParams.get("rank") === "csrankings" ? "csrankings" : "niche";
-    const defaultSort =
-      (searchParams.get("sort") as SortField) ?? (src === "niche" ? "nicheRanking" : "csRanking");
-    return getSortOptions(src).find((o) => o.value === defaultSort)?.defaultDir ?? "asc";
+    const paramSort = searchParams.get("sort");
+    const allOptions = getSortOptions(src);
+    const matchedOption = allOptions.find((o) => o.value === paramSort);
+    return matchedOption?.defaultDir ?? "asc";
   });
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -174,9 +179,28 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     [schools, debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, activeRankField, page]
   );
 
+  const allFiltered = useMemo(
+    () =>
+      filterSchools(schools, {
+        search: debouncedSearch || undefined,
+        state: stateFilter || undefined,
+        region: regionFilter || undefined,
+        sortBy,
+        sortDir,
+        rankField: activeRankField,
+      }),
+    [schools, debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, activeRankField]
+  );
+
   const paginated = result.schools;
   const totalPages = result.totalPages;
-  const hasActiveFilters = !!(search || stateFilter || regionFilter);
+  const hasActiveFilters = !!(
+    search ||
+    stateFilter ||
+    regionFilter ||
+    rankSource !== "niche" ||
+    sortBy !== "nicheRanking"
+  );
 
   // Show filtering state when debounced search is different from current search
   useEffect(() => {
@@ -368,9 +392,9 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       {showChart && (
         <div className="bg-mantle rounded-lg border border-surface0 p-4">
           <h2 className="text-sm font-bold text-subtext0 mb-4">
-            Tuition vs Median Earnings (current page)
+            Tuition vs Median Earnings (top 15 matching schools)
           </h2>
-          <ROIChart schools={paginated} />
+          <ROIChart schools={allFiltered} />
         </div>
       )}
 

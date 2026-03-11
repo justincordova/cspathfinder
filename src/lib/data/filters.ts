@@ -7,7 +7,6 @@ export type SortField =
   | "tuitionOutOfState"
   | "acceptanceRate"
   | "graduationRate"
-  | "medianEarnings6yr"
   | "medianDebt"
   | "enrollment"
   | "roi"
@@ -32,18 +31,21 @@ export interface FilterResult {
   currentPage: number;
 }
 
-// Returns payback period in years (lower = better). Negated so desc sort = best ROI first.
-function calculateROI(school: School): number {
-  if (
-    !school.medianEarnings6yr ||
-    typeof school.medianEarnings6yr !== "number" ||
-    school.medianEarnings6yr === 0
-  ) {
-    return Infinity;
-  }
+/**
+ * Returns the payback period in years (4-year in-state cost ÷ median earnings 6yr after enrollment).
+ * Returns null if data is missing or invalid.
+ */
+export function calculatePaybackYears(school: School): number | null {
+  if (!school.medianEarnings6yr || school.medianEarnings6yr <= 0) return null;
   const totalCost = (school.tuitionInState + school.roomAndBoard) * 4;
-  if (!isFinite(totalCost) || totalCost === 0) return Infinity;
-  return -(totalCost / school.medianEarnings6yr);
+  if (!isFinite(totalCost) || totalCost <= 0) return null;
+  return totalCost / school.medianEarnings6yr;
+}
+
+// Returns payback period negated so asc sort = best ROI first.
+function calculateROI(school: School): number {
+  const years = calculatePaybackYears(school);
+  return years === null ? Infinity : -years;
 }
 
 function getSortValue(school: School, field: SortField): number {
@@ -96,15 +98,12 @@ export function filterSchools(schools: School[], opts: FilterOptions): School[] 
 
   if (opts.sortBy) {
     const dir = opts.sortDir === "desc" ? -1 : 1;
-    const MAX_SCHOOLS_TO_SORT = 5000;
-    const schoolsToSort =
-      result.length > MAX_SCHOOLS_TO_SORT ? result.slice(0, MAX_SCHOOLS_TO_SORT) : result;
+    const rf = opts.rankField ?? "nicheRanking";
 
-    schoolsToSort.sort((a, b) => {
+    result.sort((a, b) => {
       const av = getSortValue(a, opts.sortBy!);
       const bv = getSortValue(b, opts.sortBy!);
       if (av !== bv) return Math.sign((av - bv) * dir);
-      const rf = opts.rankField ?? "nicheRanking";
       const ar = a[rf],
         br = b[rf];
       if (ar !== br) {
@@ -114,8 +113,6 @@ export function filterSchools(schools: School[], opts: FilterOptions): School[] 
       }
       return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
     });
-
-    result = schoolsToSort;
   }
 
   const totalCount = result.length;
