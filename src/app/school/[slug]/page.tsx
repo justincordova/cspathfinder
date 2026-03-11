@@ -22,7 +22,8 @@ export async function generateMetadata({
   return { title: school?.name ?? "School" };
 }
 
-function formatCurrency(n: number) {
+function formatCurrency(n: number | null): string {
+  if (n === null || n === 0) return "—";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -55,30 +56,44 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
   const school = getSchoolBySlug(slug);
   if (!school) notFound();
 
-  const totalCostInState = (school.tuitionInState + school.roomAndBoard) * 4;
-  const totalCostOutOfState = (school.tuitionOutOfState + school.roomAndBoard) * 4;
+  const totalCostInState =
+    school.tuitionInState && school.roomAndBoard
+      ? (school.tuitionInState + school.roomAndBoard) * 4
+      : null;
+  const totalCostOutOfState =
+    school.tuitionOutOfState && school.roomAndBoard
+      ? (school.tuitionOutOfState + school.roomAndBoard) * 4
+      : null;
   const paybackYears =
-    school.medianEarnings6yr && totalCostInState > 0
+    school.medianEarnings6yr && totalCostInState && totalCostInState > 0
       ? (totalCostInState / school.medianEarnings6yr).toFixed(1)
       : null;
 
-  const stats = [
+  const stats: { label: string; value: string }[] = [
     { label: "CSRankings", value: school.csRanking ? `#${school.csRanking}` : "N/A" },
     { label: "Niche CS", value: school.nicheRanking ? `#${school.nicheRanking}` : "N/A" },
     { label: "In-State Tuition", value: formatCurrency(school.tuitionInState) },
     { label: "Out-of-State Tuition", value: formatCurrency(school.tuitionOutOfState) },
     { label: "Room & Board", value: formatCurrency(school.roomAndBoard) },
-    { label: "Total 4-Year Cost (In-State)", value: formatCurrency(totalCostInState) },
-    { label: "Total 4-Year Cost (Out-of-State)", value: formatCurrency(totalCostOutOfState) },
-    { label: "Acceptance Rate", value: formatPercent(school.acceptanceRate) },
-    { label: "Graduation Rate", value: formatPercent(school.graduationRate) },
-    { label: "Enrollment", value: school.enrollment.toLocaleString() },
     {
       label: "Median Earnings (6yr)",
       value: school.medianEarnings6yr ? formatCurrency(school.medianEarnings6yr) : "—",
     },
     { label: "Median Debt", value: school.medianDebt ? formatCurrency(school.medianDebt) : "—" },
+    { label: "Acceptance Rate", value: formatPercent(school.acceptanceRate) },
+    { label: "Graduation Rate", value: formatPercent(school.graduationRate) },
+    { label: "Enrollment", value: school.enrollment.toLocaleString() },
   ];
+
+  if (totalCostInState) {
+    stats.push({ label: "Total 4-Year Cost (In-State)", value: formatCurrency(totalCostInState) });
+  }
+  if (totalCostOutOfState) {
+    stats.push({
+      label: "Total 4-Year Cost (Out-of-State)",
+      value: formatCurrency(totalCostOutOfState),
+    });
+  }
 
   return (
     <div id="main-content" className="py-12 space-y-10">

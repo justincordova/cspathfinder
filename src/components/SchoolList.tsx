@@ -411,7 +411,12 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
                   </p>
                   {/* Mobile: compact stats inline */}
                   <div className="sm:hidden flex gap-3 text-xs text-subtext0 mt-1">
-                    <span>Tuition: ${school.tuitionInState.toLocaleString()}</span>
+                    <span>
+                      Tuition:{" "}
+                      {school.tuitionInState > 0
+                        ? `$${school.tuitionInState.toLocaleString()}`
+                        : "—"}
+                    </span>
                     <span className="text-green">
                       {school.medianEarnings6yr
                         ? `$${school.medianEarnings6yr.toLocaleString()}`
@@ -432,12 +437,18 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
                 <div className="hidden sm:block text-right text-sm space-y-1 shrink-0">
                   <div>
                     <span className="text-subtext0">In-state: </span>
-                    <span className="font-medium">${school.tuitionInState.toLocaleString()}</span>
+                    <span className="font-medium">
+                      {school.tuitionInState > 0
+                        ? `$${school.tuitionInState.toLocaleString()}`
+                        : "—"}
+                    </span>
                   </div>
                   <div>
                     <span className="text-subtext0">Out-of-state: </span>
                     <span className="font-medium">
-                      ${school.tuitionOutOfState.toLocaleString()}
+                      {school.tuitionOutOfState > 0
+                        ? `$${school.tuitionOutOfState.toLocaleString()}`
+                        : "—"}
                     </span>
                   </div>
                   <div>
