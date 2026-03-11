@@ -84,7 +84,7 @@ export function filterSchools(schools: School[], opts: FilterOptions): School[] 
       const bv = getSortValue(b, opts.sortBy!);
       if (av !== bv) return (av - bv) * dir;
       // Tiebreaker: lower rank = better (nulls last), then alphabetical
-      const rf = opts.rankField ?? "csRanking";
+      const rf = opts.rankField ?? "nicheRanking";
       const ar = a[rf],
         br = b[rf];
       if (ar !== br) {
