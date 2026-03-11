@@ -160,7 +160,7 @@ for (const entry of ranked) {
     continue; // Skip schools without profile data
   }
 
-  const state = (profile?.state as string) ?? "??";
+  const state = (profile?.state as string) ?? "";
   const region = STATE_TO_REGION[state] ?? "Northeast";
   const nicheGrades = (profile?.nicheGrades as Record<string, string>) ?? DEFAULT_GRADES;
 

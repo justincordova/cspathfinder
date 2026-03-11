@@ -259,7 +259,7 @@ function merge(institutions: CsrInstitution[]) {
 
     const profile: Record<string, unknown> = JSON.parse(fs.readFileSync(profilePath, "utf-8"));
 
-    const state = (profile.state as string) ?? "??";
+    const state = (profile.state as string) ?? "";
     const region = STATE_TO_REGION[state] ?? "Northeast";
 
     const DEFAULT_GRADES: Record<string, string> = {
