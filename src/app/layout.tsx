@@ -7,6 +7,7 @@ import ChatButton from "@/components/ChatButton";
 import ChatDrawer from "@/components/ChatDrawer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SkipLink from "@/components/SkipLink";
+import { useChatContext } from "@/components/ChatProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -27,6 +28,22 @@ export const metadata: Metadata = {
   },
   description: "Find and compare top Computer Science programs across US colleges.",
 };
+
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const { isOpen } = useChatContext();
+  const marginClass = isOpen ? "md:mr-[420px] lg:mr-[420px]" : "";
+
+  return (
+    <main
+      className={cn(
+        "max-w-[960px] mx-auto px-8 transition-all duration-300 ease-in-out",
+        marginClass
+      )}
+    >
+      {children}
+    </main>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -49,7 +66,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <ChatProvider>
             <Navbar />
-            <main className="max-w-[960px] mx-auto px-8">{children}</main>
+            <LayoutContent>{children}</LayoutContent>
             <ChatButton />
             <ChatDrawer />
           </ChatProvider>
