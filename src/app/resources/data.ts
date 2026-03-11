@@ -29,6 +29,11 @@ export const resourceCategories = [
         url: "https://skills.github.com",
         description: "Interactive Git tutorials",
       },
+      {
+        name: "GitHub Docs",
+        url: "https://docs.github.com",
+        description: "Git and GitHub documentation",
+      },
     ],
   },
   {
@@ -73,26 +78,6 @@ export const resourceCategories = [
         name: "Coursera",
         url: "https://www.coursera.org",
         description: "College-level courses for skill-building",
-      },
-      {
-        name: "edX",
-        url: "https://www.edx.org",
-        description: "College-level courses from top universities",
-      },
-    ],
-  },
-  {
-    title: "Tools & Docs",
-    resources: [
-      {
-        name: "Can I Use",
-        url: "https://caniuse.com",
-        description: "Browser compatibility tables",
-      },
-      {
-        name: "GitHub Docs",
-        url: "https://docs.github.com",
-        description: "Git and GitHub documentation",
       },
     ],
   },
