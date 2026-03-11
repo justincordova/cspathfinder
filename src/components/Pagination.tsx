@@ -35,7 +35,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       </button>
       {withEllipsis.map((p, i) =>
         p === -1 ? (
-          <span key={`e-${i}`} className="px-1 text-subtext0">
+          <span key={`e-${i}`} className="px-1 text-subtext0" aria-label="ellipsis">
             ...
           </span>
         ) : (

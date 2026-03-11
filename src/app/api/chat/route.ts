@@ -37,10 +37,14 @@ const ChatRequestSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
 });
 
+const SYSTEM_PROMPT_TTL_MS = 5 * 60 * 1000; // 5 minutes
 let cachedSystemPrompt: string | null = null;
+let cachedSystemPromptAt = 0;
 
 function buildSystemPrompt(): string {
-  if (cachedSystemPrompt) return cachedSystemPrompt;
+  if (cachedSystemPrompt && Date.now() - cachedSystemPromptAt < SYSTEM_PROMPT_TTL_MS) {
+    return cachedSystemPrompt;
+  }
   const schools = loadSchools();
   const totalCount = schools.length;
   const schoolsForPrompt = schools.slice(0, 30);
@@ -75,6 +79,7 @@ School data (top 30):
 ${dataStr}`;
 
   cachedSystemPrompt = prompt;
+  cachedSystemPromptAt = Date.now();
   return prompt;
 }
 
@@ -131,20 +136,33 @@ export async function POST(req: NextRequest) {
     const systemPrompt = buildSystemPrompt();
     log.debug("Sending chat request", { messageCount: messages.length, model: MODEL });
 
-    try {
-      const completion = await getClient().chat.completions.create({
-        model: MODEL,
-        messages: [{ role: "system", content: systemPrompt }, ...messages],
-        max_tokens: 1024,
-      });
+    const MAX_RETRIES = 3;
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const completion = await getClient().chat.completions.create({
+          model: MODEL,
+          messages: [{ role: "system", content: systemPrompt }, ...messages],
+          max_tokens: 1024,
+        });
 
-      const reply =
-        completion.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
-      log.info("Chat response generated", { model: MODEL, tokens: completion.usage?.total_tokens });
-      return NextResponse.json({ reply });
-    } catch (err) {
-      logError("HF API error", err, { model: MODEL });
-      throw new ApiError(502, "Failed to get a response. Please try again.");
+        const reply =
+          completion.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
+        log.info("Chat response generated", {
+          model: MODEL,
+          tokens: completion.usage?.total_tokens,
+        });
+        return NextResponse.json({ reply });
+      } catch (err) {
+        lastErr = err;
+        const status = (err as { status?: number })?.status;
+        if (status && status !== 429 && status < 500) break;
+        if (attempt < MAX_RETRIES - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
+        }
+      }
     }
+    logError("HF API error", lastErr, { model: MODEL });
+    throw new ApiError(502, "Failed to get a response. Please try again.");
   }).catch(handleApiError);
 }

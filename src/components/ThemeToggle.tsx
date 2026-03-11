@@ -17,7 +17,9 @@ export default function ThemeToggle() {
     document.documentElement.setAttribute("data-theme", next === "mocha" ? "mocha" : "");
     try {
       localStorage.setItem("theme", next);
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to persist theme to localStorage:", err);
+    }
   };
 
   return (

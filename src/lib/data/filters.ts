@@ -34,9 +34,9 @@ export interface FilterResult {
 
 // Returns payback period in years (lower = better). Negated so desc sort = best ROI first.
 function calculateROI(school: School): number {
-  if (!school.medianEarnings6yr) return 0;
+  if (!school.medianEarnings6yr || school.medianEarnings6yr === 0) return Infinity;
   const totalCost = (school.tuitionInState + school.roomAndBoard) * 4;
-  if (totalCost === 0 || school.medianEarnings6yr === 0) return 0;
+  if (totalCost === 0) return Infinity;
   return -(totalCost / school.medianEarnings6yr);
 }
 

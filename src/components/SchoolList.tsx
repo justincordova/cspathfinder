@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -80,9 +80,14 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     page: number;
   } | null>(null);
 
+  const currentFiltersRef = useRef({ search, stateFilter, regionFilter, sortBy, sortDir, page });
+  useEffect(() => {
+    currentFiltersRef.current = { search, stateFilter, regionFilter, sortBy, sortDir, page };
+  });
+
   useEffect(() => {
     if (!pendingFilters) return;
-    setPreviousFilters({ search, stateFilter, regionFilter, sortBy, sortDir, page });
+    setPreviousFilters({ ...currentFiltersRef.current });
     if (pendingFilters.sortBy) setSortBy(pendingFilters.sortBy as SortField);
     if (pendingFilters.sortDir) setSortDir(pendingFilters.sortDir);
     if (pendingFilters.state !== undefined) setStateFilter(pendingFilters.state);
@@ -90,7 +95,6 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     if (pendingFilters.search !== undefined) setSearch(pendingFilters.search);
     setPage(1);
     clearPendingFilters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingFilters, clearPendingFilters]);
 
   const undoChatFilters = useCallback(() => {
@@ -302,7 +306,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       </div>
 
       {/* Results count */}
-      <p className="text-sm text-subtext0" aria-live="polite" aria-atomic="true">
+      <p className="text-sm text-subtext0" aria-live="assertive" aria-atomic="true">
         {isFiltering ? "Filtering..." : `${result.totalCount} schools`}
       </p>
 
