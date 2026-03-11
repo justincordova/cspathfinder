@@ -19,10 +19,12 @@ export default function HomePage() {
 
   return (
     <div id="main-content" className="py-12">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-2">Top CS Schools</h1>
-        <p className="text-subtext0 text-lg">
-          Compare Computer Science programs by ranking, ROI, campus life, dining, and more.
+      <div className="mb-10 text-center">
+        <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-primary via-pink to-mauve bg-clip-text text-transparent leading-tight pb-1">
+          Top CS Schools
+        </h1>
+        <p className="text-subtext1 text-lg max-w-xl mx-auto leading-relaxed">
+          Compare Computer Science schools by ranking, ROI, campus life, dining, and more.
         </p>
       </div>
       <Suspense fallback={<SchoolListFallback />}>

@@ -10,14 +10,17 @@ export default function Navbar() {
   return (
     <nav className="mx-auto max-w-[800px] mt-4 rounded-lg border border-surface0 bg-mantle px-8 shadow-sm">
       <div className="h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold text-blue">
+        <Link
+          href="/"
+          className="text-xl font-bold bg-gradient-to-r from-primary via-pink to-primary bg-[length:200%_auto] bg-clip-text text-transparent transition-[background-position] duration-500 hover:bg-[position:100%_center]"
+        >
           CSPathFinder
         </Link>
         <div className="flex items-center gap-4">
           <Link
             href="/resources"
-            className={`text-sm font-medium transition-colors ${
-              pathname === "/resources" ? "text-blue" : "text-text hover:text-subtext0"
+            className={`relative text-sm font-medium transition-colors after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-primary after:transition-transform after:duration-200 hover:after:scale-x-100 ${
+              pathname === "/resources" ? "text-primary after:scale-x-100" : "text-text"
             }`}
           >
             Resources

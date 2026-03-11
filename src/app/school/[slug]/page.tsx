@@ -101,7 +101,7 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
   return (
     <div id="main-content" className="py-12 space-y-10">
       <div>
-        <Link href="/" className="text-blue hover:underline text-sm mb-4 inline-block">
+        <Link href="/" className="text-primary hover:underline text-sm mb-4 inline-block">
           ← Back to Rankings
         </Link>
         <div className="flex items-center gap-4">
@@ -141,12 +141,13 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
       </section>
 
       {paybackYears && (
-        <section className="p-6 bg-mantle rounded-lg border border-surface0">
-          <div className="text-sm text-subtext0 mb-1">
-            Payback Period (4-Year Cost of Attendance ÷ Median Earnings 6 Years After Enrollment)
+        <section className="p-6 bg-mantle rounded-lg border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+          <div className="text-sm text-subtext0 mb-2">
+            Payback Period · 4-Year Cost of Attendance ÷ Median Earnings (6 years after enrollment)
           </div>
-          <div className="text-3xl font-bold text-text">
-            {paybackYears} <span className="text-lg font-normal text-subtext0">years</span>
+          <div className="text-4xl font-bold text-primary">
+            {paybackYears}{" "}
+            <span className="text-xl font-normal text-subtext0">years to break even</span>
           </div>
         </section>
       )}
@@ -156,7 +157,7 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
           href={school.website}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-4 py-2 bg-blue text-on-primary rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+          className="px-4 py-2 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
         >
           School Website
         </a>

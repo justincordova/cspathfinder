@@ -290,7 +290,7 @@ export default function ChatDrawer() {
                     ].map((suggestion) => (
                       <button
                         key={suggestion}
-                        className="block w-full text-left cursor-pointer hover:text-blue transition-colors px-3 py-1.5 rounded hover:bg-surface0"
+                        className="block w-full text-left cursor-pointer hover:text-primary transition-colors px-3 py-1.5 rounded hover:bg-surface0"
                         onClick={() => sendMessage(suggestion)}
                       >
                         &quot;{suggestion}&quot;
@@ -307,7 +307,7 @@ export default function ChatDrawer() {
                 >
                   <div
                     className={`max-w-[85%] px-3 py-2 rounded-lg text-sm ${
-                      msg.role === "user" ? "bg-blue text-on-primary" : "bg-surface0 text-text"
+                      msg.role === "user" ? "bg-primary text-on-primary" : "bg-surface0 text-text"
                     }`}
                   >
                     {msg.role === "assistant" ? (
@@ -389,13 +389,13 @@ export default function ChatDrawer() {
                   placeholder="Ask about CS programs..."
                   aria-label="Chat message input"
                   maxLength={2000}
-                  className="flex-1 px-3 py-2 bg-base border border-surface0 rounded-lg text-sm text-text placeholder:text-overlay0 focus:outline-none focus:ring-2 focus:ring-blue"
+                  className="flex-1 px-3 py-2 bg-base border border-surface0 rounded-lg text-sm text-text placeholder:text-overlay0 focus:outline-none focus:ring-2 focus:ring-primary"
                   disabled={loading}
                 />
                 <button
                   onClick={() => sendMessage()}
                   disabled={loading || !input.trim()}
-                  className="px-4 py-2 bg-blue text-on-primary rounded-lg hover:opacity-90 transition-opacity text-sm font-medium disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity text-sm font-medium disabled:opacity-50"
                 >
                   Send
                 </button>

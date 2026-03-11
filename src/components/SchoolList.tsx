@@ -261,14 +261,14 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
           value={search}
           onChange={(e) => updateFilter(setSearch, e.target.value.slice(0, 100))}
           maxLength={100}
-          className="flex-1 min-w-[200px] px-4 py-2 bg-mantle border border-surface0 rounded-lg text-text placeholder:text-overlay0 focus:outline-none focus:ring-2 focus:ring-blue"
+          className="flex-1 min-w-[200px] px-4 py-2 bg-mantle border border-surface0 rounded-lg text-text placeholder:text-overlay0 focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Search schools"
         />
         <div className="relative">
           <select
             value={stateFilter}
             onChange={(e) => updateFilter(setStateFilter, e.target.value)}
-            className="appearance-none px-4 py-2 pr-8 bg-mantle border border-surface0 rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-blue"
+            className="appearance-none px-4 py-2 pr-8 bg-mantle border border-surface0 rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary"
             aria-label="Filter by state"
           >
             <option value="">All States</option>
@@ -292,7 +292,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
           <select
             value={regionFilter}
             onChange={(e) => updateFilter(setRegionFilter, e.target.value)}
-            className="appearance-none px-4 py-2 pr-8 bg-mantle border border-surface0 rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-blue"
+            className="appearance-none px-4 py-2 pr-8 bg-mantle border border-surface0 rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary"
             aria-label="Filter by region"
           >
             <option value="">All Regions</option>
@@ -324,7 +324,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
               onClick={() => handleRankSourceChange(src)}
               className={`px-3 py-1 text-xs font-medium transition-colors ${
                 rankSource === src
-                  ? "bg-blue text-base"
+                  ? "bg-primary text-on-primary"
                   : "bg-mantle text-subtext0 hover:bg-surface0"
               }`}
               aria-label={`Use ${src === "csrankings" ? "CSRankings" : "Niche"} rankings`}
@@ -345,7 +345,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
               onClick={() => toggleSort(key)}
               className={`px-2.5 py-0.5 rounded-full transition-colors text-xs ${
                 sortBy === key
-                  ? "bg-blue text-base font-bold"
+                  ? "bg-primary text-on-primary font-bold"
                   : "bg-surface0 text-text hover:bg-surface1"
               }`}
               aria-label={`Sort by ${label}${sortBy === key ? `, currently ${sortDir === "asc" ? "ascending" : "descending"}, click to reverse` : ""}`}
@@ -372,9 +372,9 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
 
       {/* AI filter undo banner */}
       {previousFilters && (
-        <div className="flex items-center gap-3 px-4 py-2 bg-blue/10 border border-blue/20 rounded-lg text-sm">
+        <div className="flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg text-sm">
           <span className="text-text">AI updated your filters.</span>
-          <button onClick={undoChatFilters} className="text-blue font-medium hover:underline">
+          <button onClick={undoChatFilters} className="text-primary font-medium hover:underline">
             Undo
           </button>
         </div>
@@ -410,7 +410,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
           {hasActiveFilters && (
             <button
               onClick={clearAllFilters}
-              className="px-4 py-2 bg-blue text-on-primary rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+              className="px-4 py-2 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
             >
               Clear all filters
             </button>
@@ -423,13 +423,13 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
             <Link
               key={school.slug}
               href={`/school/${school.slug}`}
-              className="block p-5 bg-mantle rounded-lg border border-surface0 hover:border-blue transition-colors"
+              className="block p-5 bg-mantle rounded-lg border border-surface0 hover:border-primary hover:shadow-[0_0_0_1px_var(--ctp-primary)] transition-all duration-150"
             >
               <div className="flex items-start gap-4">
                 <SchoolLogo website={school.website} name={school.name} size={48} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-blue font-mono text-sm font-bold">
+                    <span className="text-primary font-mono text-sm font-bold">
                       {school[activeRankField] ? `#${school[activeRankField]}` : "—"}
                     </span>
                     <span className="font-semibold text-lg truncate">{school.name}</span>

@@ -18,6 +18,7 @@
   --color-subtext0: var(--ctp-subtext0);
   --color-subtext1: var(--ctp-subtext1);
   --color-text: var(--ctp-text);
+  --color-primary: var(--ctp-primary);
   --color-blue: var(--ctp-blue);
   --color-lavender: var(--ctp-lavender);
   --color-sapphire: var(--ctp-sapphire);
@@ -64,6 +65,8 @@
   --ctp-flamingo: #dd7878;
   --ctp-rosewater: #dc8a78;
   --ctp-on-primary: #ffffff;
+  /* primary = mauve in Latte; text on primary needs to be white */
+  --ctp-primary: #8839ef;
 }
 
 /* Catppuccin Mocha (dark) */
@@ -95,4 +98,6 @@
   --ctp-flamingo: #f2cdcd;
   --ctp-rosewater: #f5e0dc;
   --ctp-on-primary: #1e1e2e;
+  /* primary = mauve in Mocha */
+  --ctp-primary: #cba6f7;
 }
