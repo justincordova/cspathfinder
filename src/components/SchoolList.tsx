@@ -117,12 +117,16 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
   );
 
   const states = useMemo(() => {
-    const stateSet = new Set(schools.map((school) => school.state).filter(Boolean));
+    const stateSet = new Set(
+      schools.map((school) => school.state).filter((s): s is string => s != null)
+    );
     return Array.from(stateSet).sort();
   }, [schools]);
 
   const regions = useMemo(() => {
-    const regionSet = new Set(schools.map((school) => school.region).filter(Boolean));
+    const regionSet = new Set(
+      schools.map((school) => school.region).filter((r): r is Exclude<typeof r, null> => r != null)
+    );
     return Array.from(regionSet).sort();
   }, [schools]);
 
@@ -135,7 +139,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     if (debouncedSearch) params.set("q", debouncedSearch);
     if (stateFilter) params.set("state", stateFilter);
     if (regionFilter) params.set("region", regionFilter);
-    if (rankSource !== "csrankings") params.set("rank", rankSource);
+    params.set("rank", rankSource);
     if (sortBy !== activeRankField) params.set("sort", sortBy);
     if (sortDir !== "asc") params.set("dir", sortDir);
     if (page > 1) params.set("page", String(page));
