@@ -3,16 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { z } from "zod/v4";
+import { ChatFiltersSchema } from "@/lib/data/schema";
 import { useChatContext, type ChatFilters } from "./ChatProvider";
-
-const ChatFiltersSchema = z.object({
-  sortBy: z.string().optional(),
-  sortDir: z.enum(["asc", "desc"]).optional(),
-  state: z.string().optional(),
-  region: z.string().optional(),
-  search: z.string().optional(),
-});
 
 const FILTER_REGEX = /```filter\n([\s\S]*?)\n```/;
 

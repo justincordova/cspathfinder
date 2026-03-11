@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 
 const themeScript = `
 (function() {
-  try { var t = localStorage.getItem('theme'); } catch(e) {}
+  var t;
+  try { t = localStorage.getItem('theme'); } catch(e) {}
   if (!t) t = 'mocha';
   if (t === 'mocha') document.documentElement.setAttribute('data-theme', 'mocha');
 })();

@@ -5,9 +5,6 @@ const nextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "img.logo.dev" }],
   },
-  env: {
-    NEXT_PUBLIC_LOGO_DEV_TOKEN: process.env.NEXT_PUBLIC_LOGO_DEV_TOKEN,
-  },
   turbopack: {
     resolveAlias: {
       // Ensure tailwindcss resolves from project root, not a parent dir
@@ -38,6 +35,19 @@ const nextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              // Next.js requires 'unsafe-inline' for styles; theme init script needs 'unsafe-inline' for scripts
+              "script-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: https://img.logo.dev",
+              "connect-src 'self'",
+              "frame-ancestors 'none'",
+            ].join("; "),
           },
         ],
       },
