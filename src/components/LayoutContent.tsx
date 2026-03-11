@@ -8,13 +8,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const marginClass = isOpen ? "md:mr-[420px]" : "";
 
   return (
-    <main
-      className={cn(
-        "max-w-[960px] mx-auto px-8 transition-all duration-300 ease-in-out",
-        marginClass
-      )}
-    >
+    <div className={cn("transition-[margin-right] duration-500 ease-out", marginClass)}>
       {children}
-    </main>
+    </div>
   );
 }

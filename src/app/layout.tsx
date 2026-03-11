@@ -49,8 +49,10 @@ export default function RootLayout({
         <SkipLink />
         <ErrorBoundary>
           <ChatProvider>
-            <Navbar />
-            <LayoutContent>{children}</LayoutContent>
+            <LayoutContent>
+              <Navbar />
+              <main className="max-w-[960px] mx-auto px-8">{children}</main>
+            </LayoutContent>
             <ChatButton />
             <ChatDrawer />
           </ChatProvider>
