@@ -59,11 +59,13 @@ export function filterSchools(schools: School[], opts: FilterOptions): School[] 
 
   if (opts.state) {
     const states = opts.state.split(",").map((s) => s.trim().toUpperCase());
-    result = result.filter((s) => states.includes(s.state.toUpperCase()));
+    result = result.filter((s) => s.state && states.includes(s.state.toUpperCase()));
   }
 
   if (opts.region) {
-    result = result.filter((s) => s.region.toLowerCase() === opts.region!.toLowerCase());
+    result = result.filter(
+      (s) => s.region && s.region.toLowerCase() === opts.region!.toLowerCase()
+    );
   }
 
   if (opts.search) {
@@ -72,7 +74,7 @@ export function filterSchools(schools: School[], opts: FilterOptions): School[] 
       (s) =>
         s.name.toLowerCase().includes(q) ||
         s.city.toLowerCase().includes(q) ||
-        s.state.toLowerCase().includes(q) ||
+        (s.state && s.state.toLowerCase().includes(q)) ||
         s.slug.toLowerCase().includes(q)
     );
   }
