@@ -48,26 +48,30 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
   // Initialize state from URL search params (enables shareable/bookmarkable URLs)
   const [rankSource, setRankSource] = useState<RankSource>(() => {
     const param = searchParams.get("rank");
-    return param === "csrankings" ? "csrankings" : "niche";
+    return param === "niche" ? "niche" : "csrankings";
   });
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [stateFilter, setStateFilter] = useState(searchParams.get("state") ?? "");
   const [regionFilter, setRegionFilter] = useState(searchParams.get("region") ?? "");
   const [sortBy, setSortBy] = useState<SortField>(() => {
     const param = searchParams.get("sort");
-    if (!param || param === "ranking") return "nicheRanking";
+    const src = searchParams.get("rank") === "niche" ? "niche" : "csrankings";
+    if (!param || param === "ranking") return src === "niche" ? "nicheRanking" : "csRanking";
     return param as SortField;
   });
   const [sortDir, setSortDir] = useState<"asc" | "desc">(() => {
     if (searchParams.get("dir")) return searchParams.get("dir") as "asc" | "desc";
-    const defaultSort = (searchParams.get("sort") as SortField) ?? "csRanking";
-    return getSortOptions("niche").find((o) => o.value === defaultSort)?.defaultDir ?? "asc";
+    const src = searchParams.get("rank") === "niche" ? "niche" : "csrankings";
+    const defaultSort =
+      (searchParams.get("sort") as SortField) ?? (src === "niche" ? "nicheRanking" : "csRanking");
+    return getSortOptions(src).find((o) => o.value === defaultSort)?.defaultDir ?? "asc";
   });
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [isFiltering, setIsFiltering] = useState(false);
   const [showChart, setShowChart] = useState(false);
 
-  const activeRankField: SortField = rankSource === "niche" ? "nicheRanking" : "csRanking";
+  const activeRankField: "csRanking" | "nicheRanking" =
+    rankSource === "niche" ? "nicheRanking" : "csRanking";
   const sortOptions = useMemo(() => getSortOptions(rankSource), [rankSource]);
 
   const { pendingFilters, clearPendingFilters } = useChatContext();
@@ -129,7 +133,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     if (debouncedSearch) params.set("q", debouncedSearch);
     if (stateFilter) params.set("state", stateFilter);
     if (regionFilter) params.set("region", regionFilter);
-    if (rankSource !== "niche") params.set("rank", rankSource);
+    if (rankSource !== "csrankings") params.set("rank", rankSource);
     if (sortBy !== activeRankField) params.set("sort", sortBy);
     if (sortDir !== "asc") params.set("dir", sortDir);
     if (page > 1) params.set("page", String(page));
@@ -156,7 +160,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
         region: regionFilter || undefined,
         sortBy,
         sortDir,
-        rankField: activeRankField as "csRanking" | "nicheRanking",
+        rankField: activeRankField,
         page,
         perPage: PER_PAGE,
         paginate: true,
@@ -428,7 +432,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       )}
 
       {/* Pagination */}
-      {paginated.length > 0 && (
+      {result.totalCount > 0 && (
         <Pagination
           currentPage={page}
           totalPages={totalPages}

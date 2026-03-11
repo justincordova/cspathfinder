@@ -14,7 +14,11 @@ export default function ThemeToggle() {
   const toggle = () => {
     const next = theme === "latte" ? "mocha" : "latte";
     setTheme(next);
-    document.documentElement.setAttribute("data-theme", next === "mocha" ? "mocha" : "");
+    if (next === "mocha") {
+      document.documentElement.setAttribute("data-theme", "mocha");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
     try {
       localStorage.setItem("theme", next);
     } catch (err) {

@@ -20,7 +20,7 @@ function getClient(): OpenAI {
   if (!client) {
     client = new OpenAI({
       baseURL: "https://router.huggingface.co/v1",
-      apiKey: env.HF_TOKEN!,
+      apiKey: env.HF_TOKEN ?? "",
     });
   }
   return client;

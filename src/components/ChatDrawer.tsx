@@ -223,6 +223,7 @@ export default function ChatDrawer() {
                   <button
                     onClick={() => setMessages([])}
                     className="text-xs text-subtext0 hover:text-red transition-colors"
+                    aria-label="Clear chat history"
                   >
                     Clear
                   </button>

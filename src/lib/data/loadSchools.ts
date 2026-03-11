@@ -11,7 +11,7 @@ function loadFromFile(filename: string): School[] {
   const jsonPath = path.join(process.cwd(), "data", filename);
   const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
   const schools = data.map((item: unknown, index: number) => {
-    const record = item as Record<string, unknown>;
+    const record: Record<string, unknown> = { ...(item as Record<string, unknown>) };
     if (!("csRanking" in record)) record.csRanking = null;
     if (!("nicheRanking" in record)) record.nicheRanking = null;
     const result = SchoolSchema.safeParse(record);
