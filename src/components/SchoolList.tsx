@@ -21,26 +21,17 @@ interface SchoolListProps {
 }
 
 interface SortOption {
-  key: SortField;
+  value: SortField;
   label: string;
   defaultDir: "asc" | "desc";
 }
 
 const SORT_OPTIONS: SortOption[] = [
-  { key: "academics", label: "Academics", defaultDir: "asc" },
-  { key: "professors", label: "Professors", defaultDir: "asc" },
-  { key: "value", label: "Value", defaultDir: "asc" },
-  { key: "roi", label: "ROI", defaultDir: "asc" },
-  { key: "medianEarnings6yr", label: "Earnings", defaultDir: "asc" },
-  { key: "tuitionInState", label: "Tuition", defaultDir: "asc" },
-  { key: "acceptanceRate", label: "Acceptance", defaultDir: "asc" },
-  { key: "safety", label: "Safety", defaultDir: "asc" },
-  { key: "campusFood", label: "Food", defaultDir: "asc" },
-  { key: "dorms", label: "Dorms", defaultDir: "asc" },
-  { key: "studentLife", label: "Social", defaultDir: "asc" },
-  { key: "partyScene", label: "Party", defaultDir: "asc" },
-  { key: "athletics", label: "Athletics", defaultDir: "asc" },
-  { key: "diversity", label: "Diversity", defaultDir: "asc" },
+  { value: "nicheRanking", label: "Overall", defaultDir: "asc" },
+  { value: "roi", label: "ROI", defaultDir: "asc" },
+  { value: "earnings", label: "Earnings", defaultDir: "desc" },
+  { value: "tuitionInState", label: "Tuition", defaultDir: "asc" },
+  { value: "acceptanceRate", label: "Acceptance", defaultDir: "asc" },
 ];
 
 const PER_PAGE = 10;
@@ -52,13 +43,15 @@ export default function SchoolList({ schools }: SchoolListProps) {
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [stateFilter, setStateFilter] = useState(searchParams.get("state") ?? "");
   const [regionFilter, setRegionFilter] = useState(searchParams.get("region") ?? "");
-  const [sortBy, setSortBy] = useState<SortField>(
-    (searchParams.get("sort") as SortField) ?? "academics"
-  );
+  const [sortBy, setSortBy] = useState<SortField>(() => {
+    const param = searchParams.get("sort");
+    if (!param || param === "ranking") return "nicheRanking";
+    return param as SortField;
+  });
   const [sortDir, setSortDir] = useState<"asc" | "desc">(() => {
     if (searchParams.get("dir")) return searchParams.get("dir") as "asc" | "desc";
-    const defaultSort = (searchParams.get("sort") as SortField) ?? "academics";
-    return SORT_OPTIONS.find((o) => o.key === defaultSort)?.defaultDir ?? "desc";
+    const defaultSort = (searchParams.get("sort") as SortField) ?? "nicheRanking";
+    return SORT_OPTIONS.find((o) => o.value === defaultSort)?.defaultDir ?? "asc";
   });
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -117,7 +110,7 @@ export default function SchoolList({ schools }: SchoolListProps) {
     if (debouncedSearch) params.set("q", debouncedSearch);
     if (stateFilter) params.set("state", stateFilter);
     if (regionFilter) params.set("region", regionFilter);
-    if (sortBy !== "academics") params.set("sort", sortBy);
+    if (sortBy !== "nicheRanking") params.set("sort", sortBy);
     if (sortDir !== "asc") params.set("dir", sortDir);
     if (page > 1) params.set("page", String(page));
 
@@ -141,18 +134,6 @@ export default function SchoolList({ schools }: SchoolListProps) {
     [schools, debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, page]
   );
 
-  // Rank map: slug → stable rank (#1 = best, always computed from desc sort)
-  const rankMap = useMemo(() => {
-    const all = filterSchools(schools, {
-      search: debouncedSearch || undefined,
-      state: stateFilter || undefined,
-      region: regionFilter || undefined,
-      sortBy,
-      sortDir: "desc",
-    }) as School[];
-    return new Map(all.map((s, i) => [s.slug, i + 1]));
-  }, [schools, debouncedSearch, stateFilter, regionFilter, sortBy]);
-
   const paginated = result.schools;
   const totalPages = result.totalPages;
   const hasActiveFilters = !!(search || stateFilter || regionFilter);
@@ -172,7 +153,7 @@ export default function SchoolList({ schools }: SchoolListProps) {
     setSearch("");
     setStateFilter("");
     setRegionFilter("");
-    setSortBy("academics");
+    setSortBy("nicheRanking");
     setSortDir("asc");
     setPage(1);
   }, []);
@@ -182,7 +163,7 @@ export default function SchoolList({ schools }: SchoolListProps) {
       if (sortBy === key) {
         setSortDir((d) => (d === "asc" ? "desc" : "asc"));
       } else {
-        const option = SORT_OPTIONS.find((o) => o.key === key);
+        const option = SORT_OPTIONS.find((o) => o.value === key);
         setSortBy(key);
         setSortDir(option?.defaultDir ?? "desc");
       }
@@ -235,7 +216,7 @@ export default function SchoolList({ schools }: SchoolListProps) {
       <div className="flex items-start gap-2 flex-wrap text-sm">
         <span className="text-subtext0 font-medium py-0.5 shrink-0">Sort:</span>
         <div className="flex flex-wrap gap-1.5">
-          {SORT_OPTIONS.map(({ key, label }) => (
+          {SORT_OPTIONS.map(({ value: key, label }) => (
             <button
               key={key}
               onClick={() => toggleSort(key)}
@@ -326,7 +307,7 @@ export default function SchoolList({ schools }: SchoolListProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-blue font-mono text-sm font-bold">
-                      #{rankMap.get(school.slug)}
+                      {school.nicheRanking ? `#${school.nicheRanking}` : "—"}
                     </span>
                     <span className="font-semibold text-lg truncate">{school.name}</span>
                   </div>

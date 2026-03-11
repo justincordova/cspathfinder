@@ -9,7 +9,7 @@ const mockSchools: School[] = [
     state: "CA",
     city: "LA",
     region: "West",
-    ranking: 1,
+    nicheRanking: 1,
     tuitionInState: 50000,
     tuitionOutOfState: 50000,
     roomAndBoard: 15000,
@@ -43,7 +43,7 @@ const mockSchools: School[] = [
     state: "NY",
     city: "NYC",
     region: "Northeast",
-    ranking: 2,
+    nicheRanking: 2,
     tuitionInState: 30000,
     tuitionOutOfState: 40000,
     roomAndBoard: 12000,
@@ -80,9 +80,9 @@ describe("filterSchools (pure)", () => {
     expect(result[0].slug).toBe("test-u");
   });
 
-  it("should sort by Niche grade descending", () => {
-    const result = filterSchools(mockSchools, { sortBy: "partyScene", sortDir: "desc" });
-    expect(result[0].slug).toBe("other");
+  it("should sort by nicheRanking ascending", () => {
+    const result = filterSchools(mockSchools, { sortBy: "nicheRanking", sortDir: "asc" });
+    expect(result[0].slug).toBe("test-u");
   });
 
   it("should return FilterResult when paginate is true", () => {

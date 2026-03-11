@@ -60,7 +60,7 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
       : null;
 
   const stats = [
-    { label: "CS Ranking", value: `#${school.ranking}` },
+    { label: "CS Ranking", value: school.nicheRanking ? `#${school.nicheRanking}` : "—" },
     { label: "In-State Tuition", value: formatCurrency(school.tuitionInState) },
     { label: "Out-of-State Tuition", value: formatCurrency(school.tuitionOutOfState) },
     { label: "Room & Board", value: formatCurrency(school.roomAndBoard) },
@@ -140,16 +140,6 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
         >
           School Website
         </a>
-        {school.usnewsUrl && (
-          <a
-            href={school.usnewsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-surface0 text-text rounded-lg hover:bg-surface1 transition-colors text-sm font-medium"
-          >
-            US News Profile
-          </a>
-        )}
         {school.nicheUrl && (
           <a
             href={school.nicheUrl}

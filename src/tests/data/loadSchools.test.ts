@@ -19,11 +19,14 @@ describe("filterSchools", () => {
     expect(ca.every((s) => s.state === "CA")).toBe(true);
   });
 
-  it("should sort by ranking ascending", () => {
+  it("should sort by nicheRanking ascending", () => {
     const schools = loadSchools();
-    const sorted = filterSchools(schools, { sortBy: "ranking", sortDir: "asc" });
-    for (let i = 1; i < sorted.length; i++) {
-      expect(sorted[i].ranking).toBeGreaterThanOrEqual(sorted[i - 1].ranking);
+    const sorted = filterSchools(schools, { sortBy: "nicheRanking", sortDir: "asc" });
+    const ranked = (sorted as import("@/lib/data/schema").School[]).filter(
+      (s) => s.nicheRanking !== null
+    );
+    for (let i = 1; i < ranked.length; i++) {
+      expect(ranked[i].nicheRanking!).toBeGreaterThanOrEqual(ranked[i - 1].nicheRanking!);
     }
   });
 

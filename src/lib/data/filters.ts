@@ -1,7 +1,7 @@
-import { type School, type NicheGradeType, gradeToNumeric } from "@/lib/data/schema";
+import { type School } from "@/lib/data/schema";
 
 export type SortField =
-  | "ranking"
+  | "nicheRanking"
   | "tuitionInState"
   | "tuitionOutOfState"
   | "acceptanceRate"
@@ -10,19 +10,7 @@ export type SortField =
   | "medianDebt"
   | "enrollment"
   | "roi"
-  | "overall"
-  | "academics"
-  | "value"
-  | "diversity"
-  | "campus"
-  | "athletics"
-  | "partyScene"
-  | "professors"
-  | "location"
-  | "dorms"
-  | "campusFood"
-  | "studentLife"
-  | "safety";
+  | "earnings";
 
 export interface FilterOptions {
   state?: string;
@@ -42,22 +30,6 @@ export interface FilterResult {
   currentPage: number;
 }
 
-const NICHE_GRADE_FIELDS = new Set([
-  "overall",
-  "academics",
-  "value",
-  "diversity",
-  "campus",
-  "athletics",
-  "partyScene",
-  "professors",
-  "location",
-  "dorms",
-  "campusFood",
-  "studentLife",
-  "safety",
-]);
-
 // Returns payback period in years (lower = better). Negated so desc sort = best ROI first.
 function calculateROI(school: School): number {
   if (!school.medianEarnings6yr) return 0;
@@ -68,10 +40,8 @@ function calculateROI(school: School): number {
 
 function getSortValue(school: School, field: SortField): number {
   if (field === "roi") return calculateROI(school);
-  if (NICHE_GRADE_FIELDS.has(field)) {
-    const grade = school.nicheGrades[field as keyof typeof school.nicheGrades] as NicheGradeType;
-    return gradeToNumeric(grade);
-  }
+  if (field === "nicheRanking") return school.nicheRanking ?? 999;
+  if (field === "earnings") return school.medianEarnings6yr ?? 0;
   const val = school[field as keyof School];
   return typeof val === "number" ? val : 0;
 }
@@ -110,8 +80,13 @@ export function filterSchools(schools: School[], opts: FilterOptions): School[] 
       const av = getSortValue(a, opts.sortBy!);
       const bv = getSortValue(b, opts.sortBy!);
       if (av !== bv) return (av - bv) * dir;
-      // Tiebreaker: lower US News ranking = better
-      return a.ranking - b.ranking;
+      // Tiebreaker: lower nicheRanking = better (nulls last), then alphabetical
+      if (a.nicheRanking !== b.nicheRanking) {
+        if (a.nicheRanking === null) return 1;
+        if (b.nicheRanking === null) return -1;
+        return a.nicheRanking - b.nicheRanking;
+      }
+      return a.name.localeCompare(b.name);
     });
   }
 

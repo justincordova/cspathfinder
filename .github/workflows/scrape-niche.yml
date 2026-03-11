@@ -1,0 +1,37 @@
+name: Scrape Niche Rankings
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # Daily at 6 AM UTC
+  workflow_dispatch: {} # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run Niche scraper
+        run: bun run scripts/scrape-niche-rankings.ts
+
+      - name: Commit and push if changed
+        run: |
+          git diff --quiet data/schools.json && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/schools.json
+          git commit -m "data: update niche rankings $(date -u +%Y-%m-%d)"
+          git push

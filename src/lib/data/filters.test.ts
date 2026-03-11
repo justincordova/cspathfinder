@@ -9,7 +9,7 @@ function makeSchool(overrides: Partial<School> = {}): School {
     state: "CA",
     city: "San Francisco",
     region: "West",
-    ranking: 1,
+    nicheRanking: 1,
     tuitionInState: 10000,
     tuitionOutOfState: 30000,
     roomAndBoard: 12000,
@@ -44,7 +44,7 @@ const schoolA = makeSchool({
   name: "Alpha U",
   slug: "alpha-u",
   state: "CA",
-  ranking: 1,
+  nicheRanking: 1,
   tuitionInState: 5000,
   region: "West",
 });
@@ -52,7 +52,7 @@ const schoolB = makeSchool({
   name: "Beta U",
   slug: "beta-u",
   state: "NY",
-  ranking: 2,
+  nicheRanking: 2,
   tuitionInState: 15000,
   region: "Northeast",
 });
@@ -60,7 +60,7 @@ const schoolC = makeSchool({
   name: "Gamma U",
   slug: "gamma-u",
   state: "CA",
-  ranking: 3,
+  nicheRanking: 3,
   tuitionInState: 10000,
   region: "West",
 });
@@ -110,10 +110,10 @@ describe("filterSchools", () => {
     expect(result[0].tuitionInState).toBe(15000);
   });
 
-  it("sorts by niche grade field", () => {
-    const result = filterSchools(schools, { sortBy: "academics", sortDir: "desc" }) as School[];
-    // All same nicheGrades in default school, just check it doesn't crash
-    expect(result).toHaveLength(3);
+  it("sorts by nicheRanking ascending", () => {
+    const result = filterSchools(schools, { sortBy: "nicheRanking", sortDir: "asc" }) as School[];
+    expect(result[0].nicheRanking).toBe(1);
+    expect(result[2].nicheRanking).toBe(3);
   });
 
   it("paginates when paginate: true", () => {
