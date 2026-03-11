@@ -37,17 +37,11 @@ export type NicheGrades = z.infer<typeof NicheGradesSchema>;
 export const SchoolSchema = z.object({
   name: z.string(),
   slug: z.string(),
-  state: z.string().length(2),
+  state: z.string().length(2).nullable(),
   city: z.string(),
-  region: z.enum([
-    "Northeast",
-    "Southeast",
-    "Midwest",
-    "Southwest",
-    "West",
-    "Mid-Atlantic",
-    "Pacific",
-  ]),
+  region: z
+    .enum(["Northeast", "Southeast", "Midwest", "Southwest", "West", "Mid-Atlantic", "Pacific"])
+    .nullable(),
   csRanking: z.number().int().min(1).nullable(),
   nicheRanking: z.number().int().min(1).nullable(),
   tuitionInState: z.number().nonnegative(),
