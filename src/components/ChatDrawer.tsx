@@ -202,7 +202,7 @@ export default function ChatDrawer() {
         <>
           {isOpen && (
             <div
-              className="fixed inset-0 bg-crust/50 z-40 sm:hidden"
+              className="fixed inset-0 bg-crust/50 z-40 md:hidden"
               onClick={close}
               aria-hidden="true"
             />
