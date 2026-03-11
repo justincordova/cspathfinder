@@ -1,4 +1,5 @@
 import { type School } from "@/lib/data/schema";
+import { SCHOOL_ALIASES } from "./aliases";
 
 export type SortField =
   | "csRanking"
@@ -86,13 +87,14 @@ export function filterSchools(schools: School[], opts: FilterOptions): School[] 
   }
 
   if (opts.search) {
-    const q = opts.search.toLowerCase();
+    const q = opts.search.toLowerCase().trim();
     result = result.filter(
       (s) =>
         s.name.toLowerCase().includes(q) ||
         s.city.toLowerCase().includes(q) ||
         (s.state && s.state.toLowerCase().includes(q)) ||
-        s.slug.toLowerCase().includes(q)
+        s.slug.toLowerCase().includes(q) ||
+        SCHOOL_ALIASES[s.slug]?.some((alias) => alias.includes(q))
     );
   }
 

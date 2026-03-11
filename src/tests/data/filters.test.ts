@@ -165,6 +165,31 @@ describe("filterSchools (pure)", () => {
   });
 });
 
+it("should match schools by alias", () => {
+  const schools: School[] = [
+    {
+      ...mockSchools[0],
+      slug: "njit",
+      name: "NJIT",
+      city: "Newark",
+      state: "NJ",
+    },
+    {
+      ...mockSchools[1],
+      slug: "mit",
+      name: "Massachusetts Institute of Technology",
+      city: "Cambridge",
+      state: "MA",
+    },
+  ];
+  // "new jersey institute of technology" is an alias for njit
+  expect(filterSchools(schools, { search: "new jersey institute" })[0].slug).toBe("njit");
+  // "cmu" is an alias for carnegie-mellon; these schools don't have it so should return 0
+  expect(filterSchools(schools, { search: "cmu" })).toHaveLength(0);
+  // MIT slug contains "mit" so it matches directly; also "massachusetts" matches name
+  expect(filterSchools(schools, { search: "mit" })[0].slug).toBe("mit");
+});
+
 describe("calculatePaybackYears", () => {
   it("should calculate payback years correctly", () => {
     const result = calculatePaybackYears(mockSchools[0]);
