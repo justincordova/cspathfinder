@@ -4307,7 +4307,7 @@
   {
     "name": "University of the People",
     "slug": "university-of-the-people",
-    "state": "??",
+    "state": null,
     "city": "",
     "region": "Northeast",
     "csRanking": null,
@@ -6337,7 +6337,7 @@
   {
     "name": "Western Governors University",
     "slug": "western-governors-university",
-    "state": "??",
+    "state": null,
     "city": "",
     "region": "Northeast",
     "csRanking": null,
