@@ -50,7 +50,10 @@ export default function ChatDrawer() {
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        document.body.style.overflow = "hidden";
+      }
     } else {
       document.body.style.overflow = "";
     }
