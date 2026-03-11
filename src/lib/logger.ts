@@ -6,6 +6,7 @@ import { env } from "@/lib/env";
 
 const IS_PROD = env.NODE_ENV === "production";
 const IS_TEST = env.NODE_ENV === "test";
+const IS_VERCEL = process.env.VERCEL === "1";
 
 const LOG_LEVEL = env.LOG_LEVEL ?? (IS_PROD ? "info" : "debug");
 const LOG_DIR = env.LOG_DIR ?? path.join(process.cwd(), "logs");
@@ -87,7 +88,8 @@ const buildTransports = (): winston.transport[] => {
     new winston.transports.Console({ format: consoleFormat }),
   ];
 
-  if (IS_PROD) {
+  // Skip file logging on Vercel (serverless, no write access)
+  if (IS_PROD && !IS_VERCEL) {
     ensureLogsDir();
 
     transports.push(
@@ -113,7 +115,7 @@ const buildTransports = (): winston.transport[] => {
 };
 
 const buildExceptionHandlers = (): winston.transport[] => {
-  if (!IS_PROD) return [];
+  if (!IS_PROD || IS_VERCEL) return [];
   ensureLogsDir();
   return [
     new winston.transports.File({
@@ -124,7 +126,7 @@ const buildExceptionHandlers = (): winston.transport[] => {
 };
 
 const buildRejectionHandlers = (): winston.transport[] => {
-  if (!IS_PROD) return [];
+  if (!IS_PROD || IS_VERCEL) return [];
   ensureLogsDir();
   return [
     new winston.transports.File({
