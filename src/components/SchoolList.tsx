@@ -48,20 +48,20 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
   // Initialize state from URL search params (enables shareable/bookmarkable URLs)
   const [rankSource, setRankSource] = useState<RankSource>(() => {
     const param = searchParams.get("rank");
-    return param === "niche" ? "niche" : "csrankings";
+    return param === "csrankings" ? "csrankings" : "niche";
   });
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [stateFilter, setStateFilter] = useState(searchParams.get("state") ?? "");
   const [regionFilter, setRegionFilter] = useState(searchParams.get("region") ?? "");
   const [sortBy, setSortBy] = useState<SortField>(() => {
     const param = searchParams.get("sort");
-    const src = searchParams.get("rank") === "niche" ? "niche" : "csrankings";
+    const src = searchParams.get("rank") === "csrankings" ? "csrankings" : "niche";
     if (!param || param === "ranking") return src === "niche" ? "nicheRanking" : "csRanking";
     return param as SortField;
   });
   const [sortDir, setSortDir] = useState<"asc" | "desc">(() => {
     if (searchParams.get("dir")) return searchParams.get("dir") as "asc" | "desc";
-    const src = searchParams.get("rank") === "niche" ? "niche" : "csrankings";
+    const src = searchParams.get("rank") === "csrankings" ? "csrankings" : "niche";
     const defaultSort =
       (searchParams.get("sort") as SortField) ?? (src === "niche" ? "nicheRanking" : "csRanking");
     return getSortOptions(src).find((o) => o.value === defaultSort)?.defaultDir ?? "asc";
@@ -198,8 +198,8 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     setSearch("");
     setStateFilter("");
     setRegionFilter("");
-    setRankSource("csrankings");
-    setSortBy("csRanking");
+    setRankSource("niche");
+    setSortBy("nicheRanking");
     setSortDir("asc");
     setPage(1);
   }, []);
