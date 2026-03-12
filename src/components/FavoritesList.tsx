@@ -6,6 +6,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import GradeBadge from "./GradeBadge";
 import SchoolLogo from "./SchoolLogo";
 import HeartButton from "./HeartButton";
+import CompareButton from "./CompareButton";
 import { formatCurrency, formatPercent } from "@/utils/format";
 
 interface FavoritesListProps {
@@ -85,7 +86,8 @@ export default function FavoritesList({ allSchools }: FavoritesListProps) {
               </div>
             </div>
             <div className="hidden sm:block text-right text-sm space-y-1 shrink-0">
-              <div className="flex justify-end mb-1">
+              <div className="flex justify-end gap-2 mb-1">
+                <CompareButton slug={school.slug} name={school.name} />
                 <HeartButton slug={school.slug} size="sm" />
               </div>
               <div>
