@@ -23,7 +23,7 @@ export const SCHOOL_ALIASES: Record<string, string[]> = {
   "georgia-institute-of-technology": ["gt", "gatech", "ga tech", "georgia tech", "yellow jackets"],
   "cornell-university": ["cu", "big red", "cornell tech"],
   "university-of-washington": ["uw", "uw seattle", "u dub", "washington", "huskies"],
-  "university-of-texas-at-austin": ["ut", "ut austin", "longhorns", "texas", "university of texas"],
+  "university-of-texas-austin": ["ut", "ut austin", "longhorns", "texas", "university of texas"],
   "university-of-california-los-angeles": ["ucla", "uc la", "bruins"],
   "university-of-michigan-ann-arbor": ["umich", "u of m", "ann arbor", "michigan", "wolverines"],
   "columbia-university": ["cu nyc", "columbia nyc", "lions"],
@@ -60,7 +60,7 @@ export const SCHOOL_ALIASES: Record<string, string[]> = {
   "university-of-southern-california": ["usc", "southern cal", "southern california", "trojans"],
   "new-york-university": ["nyu", "new york u", "violets"],
   "virginia-tech": ["vt", "va tech", "hokies", "virginia polytechnic"],
-  "nc-state-university": ["ncsu", "nc state", "north carolina state", "wolfpack"],
+  "north-carolina-state-university": ["ncsu", "nc state", "north carolina state", "wolfpack"],
   "the-ohio-state-university": ["osu", "ohio state", "buckeyes", "columbus"],
   "penn-state": ["psu", "penn state", "nittany lions", "state college", "happy valley"],
   "university-of-massachusetts-amherst": [
@@ -141,10 +141,10 @@ export const SCHOOL_ALIASES: Record<string, string[]> = {
   "university-of-connecticut": ["uconn", "storrs", "huskies", "connecticut"],
   "university-of-delaware": ["ud", "blue hens", "delaware"],
   "university-of-iowa": ["iowa", "iowa city", "hawkeyes"],
-  "university-of-tennessee": ["utk", "knoxville", "vols", "volunteers", "tennessee"],
+  "university-of-tennessee-knoxville": ["utk", "knoxville", "vols", "volunteers", "tennessee"],
   "university-of-nebraska-lincoln": ["unl", "nebraska", "lincoln", "cornhuskers"],
   "kansas-state-university": ["kstate", "ksu", "manhattan", "wildcats", "kansas state"],
-  "university-of-kansas": ["ku", "lawrence", "jayhawks", "kansas"],
+  "the-university-of-kansas": ["ku", "lawrence", "jayhawks", "kansas"],
   "texas-am-university": ["tamu", "texas a&m", "texas a and m", "a&m", "aggies", "college station"],
   "university-of-north-carolina-at-chapel-hill": [
     "unc",
@@ -155,7 +155,7 @@ export const SCHOOL_ALIASES: Record<string, string[]> = {
   "university-of-california-riverside": ["ucr", "uc riverside", "riverside", "highlanders"],
   "colorado-state-university": ["csu", "fort collins", "rams", "colorado state"],
   "university-of-south-florida": ["usf", "south florida", "tampa", "bulls"],
-  "north-carolina-agricultural-and-technical-state-university": [
+  "north-carolina-at-state-university": [
     "ncat",
     "nc a&t",
     "a&t",
@@ -170,7 +170,7 @@ export const SCHOOL_ALIASES: Record<string, string[]> = {
   "louisiana-state-university": ["lsu", "baton rouge", "tigers", "louisiana state"],
   "oklahoma-state-university": ["okstate", "osu", "stillwater", "cowboys", "oklahoma state"],
   "university-of-oklahoma": ["ou", "norman", "sooners", "oklahoma"],
-  "university-of-alabama": ["bama", "tide", "crimson tide", "tuscaloosa", "alabama"],
+  "the-university-of-alabama": ["bama", "tide", "crimson tide", "tuscaloosa", "alabama"],
   "binghamton-university-suny": ["binghamton", "suny binghamton", "bearcats"],
   "university-at-buffalo-suny": ["ub", "university at buffalo", "buffalo", "suny buffalo", "bulls"],
   "drexel-university": ["drexel", "dragons"],

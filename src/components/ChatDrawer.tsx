@@ -144,15 +144,24 @@ export default function ChatDrawer() {
   const [aiStatus, setAiStatus] = useState<string>("unknown");
 
   useEffect(() => {
+    let cancelled = false;
     fetch("/api/chat")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`Status ${r.status}`);
+        return r.json();
+      })
       .then((data: { available?: boolean; status?: string }) => {
+        if (cancelled) return;
         setAiAvailable(data.available ?? true);
         setAiStatus(data.status ?? "unknown");
       })
       .catch(() => {
+        if (cancelled) return;
         setAiAvailable(true); // assume available if check fails
       });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const [messages, setMessages] = useState<Message[]>([]);
