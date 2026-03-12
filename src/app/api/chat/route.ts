@@ -12,6 +12,8 @@ import {
   env,
 } from "@/lib";
 import { loadSchools } from "@/lib/data/loadSchools";
+import { gradeToNumeric } from "@/lib/data/schema";
+import type { School } from "@/lib/data/schema";
 
 const log = childLogger("chat");
 
@@ -55,6 +57,16 @@ const SYSTEM_PROMPT_TTL_MS = 5 * 60 * 1000; // 5 minutes
 let cachedSystemPrompt: string | null = null;
 let cachedSystemPromptAt = 0;
 
+// Pre-compute top/bottom N schools for a given numeric extractor so the AI
+// never has to scan raw data — we hand it the answer directly.
+function topN(schools: School[], n: number, score: (s: School) => number, desc: boolean): string {
+  return [...schools]
+    .sort((a, b) => (desc ? score(b) - score(a) : score(a) - score(b)))
+    .slice(0, n)
+    .map((s) => s.name)
+    .join(", ");
+}
+
 function buildSystemPrompt(): string {
   if (cachedSystemPrompt && Date.now() - cachedSystemPromptAt < SYSTEM_PROMPT_TTL_MS) {
     return cachedSystemPrompt;
@@ -67,6 +79,46 @@ function buildSystemPrompt(): string {
     schools = [];
   }
   const totalCount = schools.length;
+  const N = 5;
+
+  // Pre-computed rankings — these are the definitive answers for superlative queries
+  const rankings = `PRE-COMPUTED RANKINGS (use these exact school names for best/worst questions):
+Food: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.campusFood), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.campusFood), false)}
+Safety: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.safety), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.safety), false)}
+Dorms: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.dorms), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.dorms), false)}
+Party: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.partyScene), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.partyScene), false)}
+Social/Student Life: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.studentLife), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.studentLife), false)}
+Diversity: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.diversity), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.diversity), false)}
+Professors: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.professors), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.professors), false)}
+Athletics: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.athletics), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.athletics), false)}
+Value: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.value), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.value), false)}
+Location: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.location), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.location), false)}
+Academics: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.academics), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.academics), false)}
+Overall: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.overall), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.overall), false)}
+In-state tuition: cheapest=${topN(schools, N, (s) => s.tuitionInState, false)} | most expensive=${topN(schools, N, (s) => s.tuitionInState, true)}
+Out-of-state tuition: cheapest=${topN(schools, N, (s) => s.tuitionOutOfState, false)} | most expensive=${topN(schools, N, (s) => s.tuitionOutOfState, true)}
+Earnings (6yr): highest=${topN(schools, N, (s) => s.medianEarnings6yr ?? 0, true)} | lowest=${topN(schools, N, (s) => s.medianEarnings6yr ?? Infinity, false)}
+Acceptance rate: easiest=${topN(schools, N, (s) => s.acceptanceRate, true)} | hardest=${topN(schools, N, (s) => s.acceptanceRate, false)}
+ROI (payback yrs): best=${topN(
+    schools,
+    N,
+    (s) => {
+      const e = s.medianEarnings6yr;
+      if (!e || e <= 0) return Infinity;
+      return ((s.tuitionInState + s.roomAndBoard) * 4) / e;
+    },
+    false
+  )} | worst=${topN(
+    schools,
+    N,
+    (s) => {
+      const e = s.medianEarnings6yr;
+      if (!e || e <= 0) return -Infinity;
+      return ((s.tuitionInState + s.roomAndBoard) * 4) / e;
+    },
+    true
+  )}`;
+
   const dataStr = schools
     .map((s) => {
       const formatCurrency = (val: number | null | undefined) =>
@@ -77,43 +129,38 @@ function buildSystemPrompt(): string {
     })
     .join("\n");
 
-  const prompt = `You are CSPathFinder AI. Help students find CS programs. You have detailed data on ${totalCount} schools below.
+  const prompt = `You are CSPathFinder AI. Help students find CS programs.
 
-CRITICAL: The school data below is the ONLY source of truth. NEVER use your pre-training knowledge about schools. Every answer about rankings, grades, tuition, safety, earnings, etc. MUST come from the data below. If you answer from memory instead of the data, you will be wrong.
+CRITICAL: For ALL best/worst/top/cheapest/most questions, you MUST use the PRE-COMPUTED RANKINGS section below. Do NOT scan the raw school data. Do NOT use your training knowledge. The pre-computed rankings are the authoritative answers — copy the school names from there exactly.
+
+${rankings}
 
 RULES:
 - For single-school or simple questions: 2-3 sentences max.
 - For comparisons of 2+ schools: up to 6-8 sentences. Use a short bullet list with **School Name**: key differentiator format for easy scanning.
 - Never dump raw stats — the app shows those. Focus on qualitative insight.
 - Use **bold** for school names only.
-- When a superlative question is asked ("best", "worst", "safest", "least safe", "cheapest", "most expensive", "highest earnings", etc.):
-  1. Scan the data below for the actual top/bottom values for that metric.
-  2. Name exactly the 5 schools with the highest or lowest values for that metric.
-  3. Always emit a filter block so the list updates to match.
-  Do NOT guess from memory. The data is right here — use it.
-- When filtering/sorting helps, append a filter block (no explanation needed):
+- For superlative questions ("best X", "worst X", "cheapest", "safest", "least safe", etc.): look up the answer in PRE-COMPUTED RANKINGS above and name exactly those 5 schools.
+- Always emit a filter block when sorting/filtering helps (no explanation needed):
 \`\`\`filter
 {"sortBy": "...", "sortDir": "..."}
 \`\`\`
 - sortBy options: csRanking, nicheRanking, roi, earnings, tuitionInState, acceptanceRate, campusFood, dorms, safety, partyScene, diversity, studentLife, professors, athletics, value, location, academics
 - rankSource: "csrankings" (default) or "niche" — sets which ranking source the UI uses
 - filter fields: state ("CA", "NJ"), region ("Northeast"), search (name match)
-- For niche grade sorts: sortDir "desc" = best first (A+ is best), sortDir "asc" = worst first (F/D/C is worst). Example: "least safe" → sortBy "safety", sortDir "asc".
-- When asked to compare 2-4 schools, include "compare": [{"slug": "slug1", "name": "Full School Name"}, ...] in the filter block. Use the slug shown in brackets after each school name in the data. Example: MIT slug = "mit", Stanford University slug = "stanford-university".
-- Do NOT list out stats — the user can see them in the app. Just answer the question conversationally.
-- After your response, you MAY append a suggestions block (only when genuinely helpful):
+- For niche grade sorts: sortDir "desc" = best first, sortDir "asc" = worst first.
+- When asked to compare 2-4 schools, include "compare": [{"slug": "slug1", "name": "Full School Name"}, ...] in the filter block. Slugs are shown in [brackets] in the school data below.
+- Do NOT list out stats — the user can see them in the app. Just answer conversationally.
+- After your response, you MAY append a suggestions block (only when genuinely helpful, max 3):
 \`\`\`suggestions
-["Follow-up question 1?", "Follow-up question 2?", "Follow-up question 3?"]
+["Follow-up question 1?", "Follow-up question 2?"]
 \`\`\`
-  Max 3 suggestions. Only include when there are natural follow-ups. Do not include for simple factual answers.
 
 Examples:
-- "Best food?" → scan data for highest Food= grades, name those 5 + \`\`\`filter\\n{"sortBy": "campusFood", "sortDir": "desc"}\\n\`\`\`
-- "Worst safety / least safe?" → scan data for lowest Safety= grades, name those 5 + \`\`\`filter\\n{"sortBy": "safety", "sortDir": "asc"}\\n\`\`\`
-- "Cheapest in CA?" → scan data for lowest In-state tuition where state=CA, name those 5 + \`\`\`filter\\n{"sortBy": "tuitionInState", "sortDir": "asc", "state": "CA"}\\n\`\`\`
-- "Best dorms?" → scan data for highest Dorms= grades, name those 5 + \`\`\`filter\\n{"sortBy": "dorms", "sortDir": "desc"}\\n\`\`\`
-- "Compare MIT and Stanford" → bullet list comparison + \`\`\`filter\\n{"compare": [{"slug": "mit", "name": "MIT"}, {"slug": "stanford-university", "name": "Stanford University"}]}\\n\`\`\`
-- "Best NJ school?" → scan data for state=NJ, name top 5 by ranking + \`\`\`filter\\n{"sortBy": "csRanking", "sortDir": "asc", "state": "NJ"}\\n\`\`\`
+- "Worst food?" → use PRE-COMPUTED Food worst, name those 5 + \`\`\`filter\\n{"sortBy": "campusFood", "sortDir": "asc"}\\n\`\`\`
+- "Least safe schools?" → use PRE-COMPUTED Safety worst, name those 5 + \`\`\`filter\\n{"sortBy": "safety", "sortDir": "asc"}\\n\`\`\`
+- "Cheapest in CA?" → filter to CA schools, find cheapest from raw data + \`\`\`filter\\n{"sortBy": "tuitionInState", "sortDir": "asc", "state": "CA"}\\n\`\`\`
+- "Compare MIT and Stanford" → bullet list + \`\`\`filter\\n{"compare": [{"slug": "mit", "name": "MIT"}, {"slug": "stanford-university", "name": "Stanford University"}]}\\n\`\`\`
 
 School data (${totalCount} schools):
 ${dataStr}`;
