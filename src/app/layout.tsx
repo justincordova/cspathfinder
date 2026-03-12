@@ -30,6 +30,9 @@ export const metadata: Metadata = {
     template: "%s | CSPathFinder",
   },
   description: "Find and compare top Computer Science programs across US colleges.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
