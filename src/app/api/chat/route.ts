@@ -66,15 +66,16 @@ function topN(schools: School[], n: number, score: (s: School) => number, desc: 
     .join(", ");
 }
 
-// Shared schools cache — loaded once per process.
+// Shared schools cache — loaded once per process on first successful load.
+// On failure we do NOT cache, so the next request retries the file read.
 let cachedSchools: School[] | null = null;
 function getSchools(): School[] {
-  if (cachedSchools) return cachedSchools;
+  if (cachedSchools !== null) return cachedSchools;
   try {
     cachedSchools = loadSchools();
   } catch (err) {
     logError("Failed to load schools", err);
-    cachedSchools = [];
+    return [];
   }
   return cachedSchools;
 }
