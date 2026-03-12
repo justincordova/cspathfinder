@@ -9,23 +9,10 @@ import GradeBadge from "./GradeBadge";
 import SchoolLogo from "./SchoolLogo";
 import HeartButton from "./HeartButton";
 import { cn } from "@/utils/cn";
+import { formatCurrency, formatPercent, GRADE_LABELS } from "@/utils/format";
 
 interface CompareTableProps {
   schools: School[];
-}
-
-function formatCurrency(n: number | null | undefined): string {
-  if (n === null || n === undefined || !isFinite(n) || n === 0) return "—";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function formatPercent(n: number | null | undefined): string {
-  if (n === null || n === undefined || !isFinite(n) || n < 0 || n > 1) return "—";
-  return `${(n * 100).toFixed(0)}%`;
 }
 
 type RowDef = {
@@ -51,22 +38,6 @@ const GRADE_KEYS: (keyof NicheGrades)[] = [
   "location",
   "campus",
 ];
-
-const GRADE_LABELS: Record<keyof NicheGrades, string> = {
-  overall: "Overall",
-  academics: "Academics",
-  professors: "Professors",
-  campusFood: "Campus Food",
-  dorms: "Dorms",
-  studentLife: "Student Life",
-  safety: "Safety",
-  diversity: "Diversity",
-  athletics: "Athletics",
-  partyScene: "Party Scene",
-  value: "Value",
-  location: "Location",
-  campus: "Campus",
-};
 
 const ROWS: RowDef[] = [
   // Rankings

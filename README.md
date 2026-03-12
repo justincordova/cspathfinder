@@ -13,20 +13,34 @@ Find and compare the top Computer Science programs across US colleges.
 
 **School Details**
 
-- View Niche letter grades across 12 categories: academics, campus food, party scene, social life, dorms, safety, professors, athletics, diversity, value, and location
-- Compare ROI and earnings data
+- View Niche letter grades across 13 categories: academics, campus food, party scene, social life, dorms, safety, professors, athletics, diversity, value, location, campus, and overall
+- See payback period: 4-year cost of attendance divided by median earnings 6 years after enrollment
 - See school logos and quick stats at a glance
+
+**Compare Schools**
+
+- Add up to 3 schools to a side-by-side comparison
+- Highlights the best value in each row (rankings, tuition, earnings, debt, Niche grades)
+- Persistent across pages via session storage
+
+**Saved Schools**
+
+- Heart any school to save it to your favorites list
+- Favorites persist across sessions via local storage
+- View all saved schools on the /favorites page
 
 **AI Assistant**
 
 - Ask questions like "Best CS school for food?" or "Cheapest top 20 programs?"
 - Get instant answers with automatic filter suggestions
 - The chat applies filters to your list so you can see results immediately
+- Chat history persists across sessions
 
 **Visual Data**
 
-- ROI charts comparing multiple schools
+- ROI chart comparing tuition vs median earnings across filtered results
 - Clean, readable tables with pagination
+- Shareable URLs — filters are reflected in the URL
 - Dark and light theme modes
 
 ## Live Site

@@ -127,5 +127,3 @@ export function getSchoolBySlug(slug: string): School | undefined {
     return undefined;
   }
 }
-
-export * from "./filters";

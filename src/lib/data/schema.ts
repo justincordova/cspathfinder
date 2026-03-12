@@ -73,7 +73,9 @@ export const ResourceCategorySchema = z.object({
 export type ResourceCategory = z.infer<typeof ResourceCategorySchema>;
 
 export const ChatFiltersSchema = z.object({
-  sortBy: z.string().max(50).optional(),
+  sortBy: z
+    .enum(["csRanking", "nicheRanking", "roi", "earnings", "tuitionInState", "acceptanceRate"])
+    .optional(),
   rankSource: z.enum(["csrankings", "niche"]).optional(),
   sortDir: z.enum(["asc", "desc"]).optional(),
   state: z.string().length(2).optional(),

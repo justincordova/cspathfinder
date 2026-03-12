@@ -1,18 +1,17 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import {
-  loadSchoolsBySource,
-  getSchoolBySlug,
-  calculatePaybackYears,
-} from "@/lib/data/loadSchools";
+import { loadSchoolsBySource, getSchoolBySlug } from "@/lib/data/loadSchools";
+import { calculatePaybackYears } from "@/lib/data/filters";
 import GradeBadge from "@/components/GradeBadge";
 import SchoolLogo from "@/components/SchoolLogo";
 import SchoolChatContext from "@/components/SchoolChatContext";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import type { Metadata } from "next";
 import type { NicheGrades, NicheGradeType } from "@/lib/data/schema";
+
 import HeartButton from "@/components/HeartButton";
 import PageTransition from "@/components/PageTransition";
+import { formatCurrency, formatPercent, GRADE_LABELS } from "@/utils/format";
 
 export async function generateStaticParams() {
   const all = [...loadSchoolsBySource("csrankings"), ...loadSchoolsBySource("niche")];
@@ -29,37 +28,6 @@ export async function generateMetadata({
   const school = getSchoolBySlug(slug);
   return { title: school?.name ?? "Not Found" };
 }
-
-function formatCurrency(n: number | null): string {
-  if (n === null || typeof n !== "number" || !isFinite(n) || n === 0) return "—";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function formatPercent(n: number): string {
-  if (typeof n !== "number" || !isFinite(n) || n < 0 || n > 1) return "—";
-  const percent = n * 100;
-  return `${Math.round(percent * 10) / 10}%`;
-}
-
-const GRADE_LABELS: Record<keyof NicheGrades, string> = {
-  overall: "Overall",
-  academics: "Academics",
-  value: "Value",
-  diversity: "Diversity",
-  campus: "Campus",
-  athletics: "Athletics",
-  partyScene: "Party Scene",
-  professors: "Professors",
-  location: "Location",
-  dorms: "Dorms",
-  campusFood: "Campus Food",
-  studentLife: "Student Life",
-  safety: "Safety",
-};
 
 export default async function SchoolPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

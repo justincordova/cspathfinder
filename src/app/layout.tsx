@@ -19,7 +19,7 @@ const themeScript = `
 (function() {
   var t;
   try { t = localStorage.getItem('theme'); } catch(e) {}
-  if (!t) t = 'mocha';
+  if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'mocha' : 'latte';
   if (t === 'mocha') document.documentElement.setAttribute('data-theme', 'mocha');
 })();
 `;

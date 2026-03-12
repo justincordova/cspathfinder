@@ -77,7 +77,6 @@ function getDomain(url: string): string {
       ".ph",
       ".ar",
       ".cl",
-      ".co",
       ".pe",
       ".ve",
       ".uy",

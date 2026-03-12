@@ -200,7 +200,7 @@ export default function ChatDrawer() {
       let messagesToSend = newMessages.slice(-20);
       if (schoolContext && messagesRef.current.length === 0) {
         const contextMsg = {
-          id: Math.random().toString(36).substr(2, 9),
+          id: String(nextIdRef.current++),
           role: "user" as const,
           content: `I'm looking at ${schoolContext}'s profile.`,
         };

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { loadSchools, filterSchools } from "@/lib/data/loadSchools";
+import { loadSchools } from "@/lib/data/loadSchools";
+import { filterSchools } from "@/lib/data/filters";
 
 describe("loadSchools", () => {
   it("should load and validate all school data", () => {

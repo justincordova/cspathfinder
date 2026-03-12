@@ -213,12 +213,11 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         lastErr = err;
         let shouldRetry = true;
-        let isRetryable = true;
 
         if (err && typeof err === "object" && "status" in err) {
           const status = (err as { status?: number }).status;
           if (typeof status === "number") {
-            isRetryable = status === 429 || (status >= 500 && status < 600);
+            const isRetryable = status === 429 || (status >= 500 && status < 600);
             shouldRetry = isRetryable && attempt < MAX_RETRIES - 1;
           }
         }
