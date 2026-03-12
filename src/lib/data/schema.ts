@@ -74,13 +74,32 @@ export type ResourceCategory = z.infer<typeof ResourceCategorySchema>;
 
 export const ChatFiltersSchema = z.object({
   sortBy: z
-    .enum(["csRanking", "nicheRanking", "roi", "earnings", "tuitionInState", "acceptanceRate"])
+    .enum([
+      "csRanking",
+      "nicheRanking",
+      "roi",
+      "earnings",
+      "tuitionInState",
+      "acceptanceRate",
+      "campusFood",
+      "dorms",
+      "safety",
+      "partyScene",
+      "diversity",
+      "studentLife",
+      "professors",
+      "athletics",
+      "value",
+      "location",
+      "academics",
+    ])
     .optional(),
   rankSource: z.enum(["csrankings", "niche"]).optional(),
   sortDir: z.enum(["asc", "desc"]).optional(),
   state: z.string().length(2).optional(),
   region: z.string().max(30).optional(),
   search: z.string().max(100).optional(),
+  compare: z.array(z.string()).max(4).optional(),
 });
 export type ChatFilters = z.infer<typeof ChatFiltersSchema>;
 

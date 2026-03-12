@@ -1,4 +1,4 @@
-import { type School } from "@/lib/data/schema";
+import { type School, gradeToNumeric } from "@/lib/data/schema";
 import { SCHOOL_ALIASES } from "./aliases";
 
 export type SortField =
@@ -11,7 +11,18 @@ export type SortField =
   | "medianDebt"
   | "enrollment"
   | "roi"
-  | "earnings";
+  | "earnings"
+  | "campusFood"
+  | "dorms"
+  | "safety"
+  | "partyScene"
+  | "diversity"
+  | "studentLife"
+  | "professors"
+  | "athletics"
+  | "value"
+  | "location"
+  | "academics";
 
 export interface FilterOptions {
   state?: string;
@@ -60,6 +71,18 @@ function getSortValue(school: School, field: SortField): number {
   if (field === "graduationRate") return school.graduationRate;
   if (field === "medianDebt") return school.medianDebt ?? 0;
   if (field === "enrollment") return school.enrollment;
+  // Niche grade fields — higher numeric = better grade
+  if (field === "campusFood") return gradeToNumeric(school.nicheGrades.campusFood);
+  if (field === "dorms") return gradeToNumeric(school.nicheGrades.dorms);
+  if (field === "safety") return gradeToNumeric(school.nicheGrades.safety);
+  if (field === "partyScene") return gradeToNumeric(school.nicheGrades.partyScene);
+  if (field === "diversity") return gradeToNumeric(school.nicheGrades.diversity);
+  if (field === "studentLife") return gradeToNumeric(school.nicheGrades.studentLife);
+  if (field === "professors") return gradeToNumeric(school.nicheGrades.professors);
+  if (field === "athletics") return gradeToNumeric(school.nicheGrades.athletics);
+  if (field === "value") return gradeToNumeric(school.nicheGrades.value);
+  if (field === "location") return gradeToNumeric(school.nicheGrades.location);
+  if (field === "academics") return gradeToNumeric(school.nicheGrades.academics);
   return 0;
 }
 
