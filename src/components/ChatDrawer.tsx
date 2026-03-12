@@ -96,18 +96,24 @@ export default function ChatDrawer() {
     return () => document.removeEventListener("keydown", handleTab);
   }, [isOpen]);
 
-  const [messages, setMessages] = useState<Message[]>(() => {
-    if (typeof window === "undefined") return [];
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  // Hydrate chat history from localStorage after mount to avoid SSR mismatch
+  const chatHistoryLoaded = useRef(false);
+  useEffect(() => {
+    if (chatHistoryLoaded.current) return;
+    chatHistoryLoaded.current = true;
     try {
       const stored = localStorage.getItem("cspathfinder-chat-history");
-      if (!stored) return [];
+      if (!stored) return;
       const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed)) return parsed as Message[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        setMessages(parsed as Message[]);
+      }
     } catch {
       // ignore parse errors
     }
-    return [];
-  });
+  }, []);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [typingDots, setTypingDots] = useState(0);
