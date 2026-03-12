@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <main className="flex flex-col min-h-screen items-center justify-center bg-base">
+    <div className="flex flex-col min-h-[60vh] items-center justify-center">
       <div
         role="status"
         aria-live="polite"
@@ -8,6 +8,6 @@ export default function Loading() {
       >
         <span className="sr-only">Loading...</span>
       </div>
-    </main>
+    </div>
   );
 }

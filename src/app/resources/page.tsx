@@ -1,11 +1,14 @@
+import type { Metadata } from "next";
 import ResourceCard from "./ResourceCard";
 import { resourceCategories } from "./data";
 import PageTransition from "@/components/PageTransition";
 
+export const metadata: Metadata = { title: "Resources" };
+
 export default function ResourcesPage() {
   return (
     <PageTransition>
-      <main className="max-w-[960px] mx-auto px-4 py-8">
+      <div id="main-content" className="py-8">
         <section className="mb-12">
           <h1 className="text-3xl font-bold mb-4">Resources for New Developers</h1>
           <p className="text-lg text-subtext0 max-w-2xl">
@@ -29,7 +32,7 @@ export default function ResourcesPage() {
             </div>
           </section>
         ))}
-      </main>
+      </div>
     </PageTransition>
   );
 }
