@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { School, NicheGrades } from "@/lib/data/schema";
 import { gradeToNumeric } from "@/lib/data/schema";
-import { calculatePaybackYears } from "@/lib/data/loadSchools";
+import { calculatePaybackYears } from "@/lib/data/filters";
 import GradeBadge from "./GradeBadge";
 import SchoolLogo from "./SchoolLogo";
 import HeartButton from "./HeartButton";
