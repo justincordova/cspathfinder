@@ -108,7 +108,20 @@ export default function ChatDrawer() {
       if (!stored) return;
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        setMessages(parsed as Message[]);
+        // Deduplicate messages by role+content and regenerate IDs
+        const seen = new Set<string>();
+        const deduped: Message[] = [];
+        for (const msg of parsed) {
+          const key = `${msg.role}:${msg.content}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            deduped.push({
+              ...msg,
+              id: String(nextIdRef.current++),
+            });
+          }
+        }
+        setMessages(deduped);
       }
     } catch {
       // ignore parse errors
