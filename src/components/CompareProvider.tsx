@@ -5,22 +5,42 @@ import { createContext, useContext, useState, useCallback, useEffect, type React
 const MAX_COMPARE = 3;
 const STORAGE_KEY = "cspathfinder-compare";
 
-function readFromStorage(): string[] {
+interface StoredEntry {
+  slug: string;
+  name: string;
+}
+
+function readFromStorage(): StoredEntry[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return (parsed as string[]).slice(0, MAX_COMPARE);
+    if (Array.isArray(parsed)) {
+      // Support both old (string[]) and new (StoredEntry[]) formats
+      return (parsed as unknown[])
+        .slice(0, MAX_COMPARE)
+        .map((item) => {
+          if (typeof item === "string") return { slug: item, name: item };
+          if (item && typeof item === "object" && "slug" in item) {
+            return {
+              slug: String((item as StoredEntry).slug),
+              name: String((item as StoredEntry).name || (item as StoredEntry).slug),
+            };
+          }
+          return null;
+        })
+        .filter((item): item is StoredEntry => item !== null);
+    }
   } catch {
     // ignore
   }
   return [];
 }
 
-function writeToStorage(slugs: string[]): void {
+function writeToStorage(entries: StoredEntry[]): void {
   try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(slugs));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   } catch {
     // ignore
   }
@@ -28,9 +48,10 @@ function writeToStorage(slugs: string[]): void {
 
 interface CompareContextType {
   slugs: string[];
-  add: (slug: string) => void;
+  names: Record<string, string>;
+  add: (slug: string, name: string) => void;
   remove: (slug: string) => void;
-  toggle: (slug: string) => void;
+  toggle: (slug: string, name: string) => void;
   isSelected: (slug: string) => boolean;
   clear: () => void;
   isFull: boolean;
@@ -45,38 +66,41 @@ export function useCompareContext() {
 }
 
 export default function CompareProvider({ children }: { children: ReactNode }) {
-  const [slugs, setSlugs] = useState<string[]>([]);
+  const [entries, setEntries] = useState<StoredEntry[]>([]);
 
   // Hydrate from sessionStorage after mount to avoid SSR mismatch
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setSlugs(readFromStorage()), []);
+  useEffect(() => setEntries(readFromStorage()), []);
 
-  const add = useCallback((slug: string) => {
-    setSlugs((prev) => {
-      if (prev.includes(slug) || prev.length >= MAX_COMPARE) return prev;
-      const next = [...prev, slug];
+  const slugs = entries.map((e) => e.slug);
+  const names: Record<string, string> = Object.fromEntries(entries.map((e) => [e.slug, e.name]));
+
+  const add = useCallback((slug: string, name: string) => {
+    setEntries((prev) => {
+      if (prev.some((e) => e.slug === slug) || prev.length >= MAX_COMPARE) return prev;
+      const next = [...prev, { slug, name }];
       writeToStorage(next);
       return next;
     });
   }, []);
 
   const remove = useCallback((slug: string) => {
-    setSlugs((prev) => {
-      const next = prev.filter((s) => s !== slug);
+    setEntries((prev) => {
+      const next = prev.filter((e) => e.slug !== slug);
       writeToStorage(next);
       return next;
     });
   }, []);
 
-  const toggle = useCallback((slug: string) => {
-    setSlugs((prev) => {
-      if (prev.includes(slug)) {
-        const next = prev.filter((s) => s !== slug);
+  const toggle = useCallback((slug: string, name: string) => {
+    setEntries((prev) => {
+      if (prev.some((e) => e.slug === slug)) {
+        const next = prev.filter((e) => e.slug !== slug);
         writeToStorage(next);
         return next;
       }
       if (prev.length >= MAX_COMPARE) return prev;
-      const next = [...prev, slug];
+      const next = [...prev, { slug, name }];
       writeToStorage(next);
       return next;
     });
@@ -85,13 +109,22 @@ export default function CompareProvider({ children }: { children: ReactNode }) {
   const isSelected = useCallback((slug: string) => slugs.includes(slug), [slugs]);
 
   const clear = useCallback(() => {
-    setSlugs([]);
+    setEntries([]);
     writeToStorage([]);
   }, []);
 
   return (
     <CompareContext.Provider
-      value={{ slugs, add, remove, toggle, isSelected, clear, isFull: slugs.length >= MAX_COMPARE }}
+      value={{
+        slugs,
+        names,
+        add,
+        remove,
+        toggle,
+        isSelected,
+        clear,
+        isFull: slugs.length >= MAX_COMPARE,
+      }}
     >
       {children}
     </CompareContext.Provider>

@@ -43,9 +43,9 @@ describe("parseFilterBlock", () => {
   });
 
   it("extracts valid filter block", () => {
-    const text = 'Here are results\n```filter\n{"sortBy":"ranking","sortDir":"asc"}\n```';
+    const text = 'Here are results\n```filter\n{"sortBy":"csRanking","sortDir":"asc"}\n```';
     const result = parseFilterBlock(text);
-    expect(result.filters).toEqual({ sortBy: "ranking", sortDir: "asc" });
+    expect(result.filters).toEqual({ sortBy: "csRanking", sortDir: "asc" });
     expect(result.cleanText).toBe("Here are results");
   });
 

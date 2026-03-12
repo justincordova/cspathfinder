@@ -4,15 +4,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useCompareContext } from "@/components/CompareProvider";
 
-function slugToName(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 export default function CompareBar() {
-  const { slugs, remove, clear } = useCompareContext();
+  const { slugs, names, remove, clear } = useCompareContext();
   const [mounted, setMounted] = useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
@@ -30,11 +23,11 @@ export default function CompareBar() {
             key={slug}
             className="flex items-center gap-1 px-2 py-0.5 bg-surface0 rounded-full text-sm text-text"
           >
-            <span className="max-w-[140px] truncate">{slugToName(slug)}</span>
+            <span className="max-w-[140px] truncate">{names[slug] ?? slug}</span>
             <button
               type="button"
               onClick={() => remove(slug)}
-              aria-label={`Remove ${slugToName(slug)} from comparison`}
+              aria-label={`Remove ${names[slug] ?? slug} from comparison`}
               className="text-subtext0 hover:text-red transition-colors ml-0.5"
             >
               <svg

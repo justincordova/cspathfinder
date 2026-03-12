@@ -19,7 +19,7 @@ export default function CompareButton({ slug, name }: CompareButtonProps) {
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!disabled) toggle(slug);
+        if (!disabled) toggle(slug, name);
       }}
       disabled={disabled}
       aria-label={selected ? `Remove ${name} from comparison` : `Add ${name} to comparison`}

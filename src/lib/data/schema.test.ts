@@ -113,7 +113,7 @@ describe("SchoolSchema", () => {
 
 describe("ChatFiltersSchema", () => {
   it("parses valid filter object", () => {
-    const result = ChatFiltersSchema.safeParse({ sortBy: "ranking", sortDir: "asc" });
+    const result = ChatFiltersSchema.safeParse({ sortBy: "csRanking", sortDir: "asc" });
     expect(result.success).toBe(true);
   });
 
