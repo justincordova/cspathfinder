@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { SchoolSchema, NicheGrade } from "@/lib/data/schema";
+import { SchoolSchema, NicheGrade, gradeToNumeric, ChatFiltersSchema } from "@/lib/data/schema";
 
 const validSchool = {
   name: "Massachusetts Institute of Technology",
@@ -91,6 +91,46 @@ describe("School Schema", () => {
       ...validSchool,
       nicheGrades: { ...validSchool.nicheGrades, overall: "Z+" },
     });
+    expect(result.success).toBe(false);
+  });
+
+  it("should accept null for nullable fields", () => {
+    const result = SchoolSchema.safeParse({
+      ...validSchool,
+      medianEarnings6yr: null,
+      medianDebt: null,
+      usnewsUrl: null,
+      nicheUrl: null,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("gradeToNumeric", () => {
+  it("maps A+ to 13 and F to 1", () => {
+    expect(gradeToNumeric("A+")).toBe(13);
+    expect(gradeToNumeric("F")).toBe(1);
+  });
+
+  it("maintains A+ > A > B+ ordering", () => {
+    expect(gradeToNumeric("A+")).toBeGreaterThan(gradeToNumeric("A"));
+    expect(gradeToNumeric("A")).toBeGreaterThan(gradeToNumeric("B+"));
+  });
+});
+
+describe("ChatFiltersSchema", () => {
+  it("parses valid filter object", () => {
+    const result = ChatFiltersSchema.safeParse({ sortBy: "csRanking", sortDir: "asc" });
+    expect(result.success).toBe(true);
+  });
+
+  it("parses empty object", () => {
+    const result = ChatFiltersSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects invalid sortDir", () => {
+    const result = ChatFiltersSchema.safeParse({ sortDir: "sideways" });
     expect(result.success).toBe(false);
   });
 });

@@ -41,6 +41,12 @@ function setGlobalFavorites(next: Set<string>) {
   listeners.forEach((l) => l(next));
 }
 
+/** Reset module-level state — for use in tests only. */
+export function __resetForTesting() {
+  globalFavorites = null;
+  listeners.clear();
+}
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 

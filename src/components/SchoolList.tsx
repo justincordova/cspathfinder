@@ -182,22 +182,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     page,
   ]);
 
-  const result = useMemo(
-    () =>
-      filterSchools(schools, {
-        search: debouncedSearch || undefined,
-        state: stateFilter || undefined,
-        region: regionFilter || undefined,
-        sortBy,
-        sortDir,
-        rankField: activeRankField,
-        page,
-        perPage: PER_PAGE,
-        paginate: true,
-      }) as FilterResult,
-    [schools, debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, activeRankField, page]
-  );
-
+  // Run filter+sort once; derive pagination from the full sorted result
   const allFiltered = useMemo(
     () =>
       filterSchools(schools, {
@@ -210,6 +195,15 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       }),
     [schools, debouncedSearch, stateFilter, regionFilter, sortBy, sortDir, activeRankField]
   );
+
+  const result = useMemo((): FilterResult => {
+    const totalCount = allFiltered.length;
+    const safePage = Math.max(1, page);
+    const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE));
+    const currentPage = Math.min(safePage, totalPages);
+    const schools2 = allFiltered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+    return { schools: schools2, totalCount, totalPages, currentPage };
+  }, [allFiltered, page]);
 
   const paginated = result.schools;
   const totalPages = result.totalPages;
