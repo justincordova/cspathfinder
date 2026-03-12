@@ -342,13 +342,16 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       {/* Ranking source toggle */}
       <div className="flex items-center gap-1 text-sm">
         <span className="text-subtext0 font-medium mr-1">Ranking:</span>
-        <span
-          className="text-subtext0 cursor-help mr-1"
-          title="Niche ranks based on student reviews; CSRankings ranks based on faculty research publications"
-          aria-label="Ranking source info"
-        >
-          ⓘ
-        </span>
+        <div className="relative group flex items-center">
+          <span className="text-subtext0 cursor-help mr-1" aria-label="Ranking source info">
+            ⓘ
+          </span>
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-crust text-text text-xs rounded shadow-lg border border-surface0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 pointer-events-none text-center">
+            Niche ranks based on student reviews; CSRankings ranks based on faculty research
+            publications
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-crust"></div>
+          </div>
+        </div>
         <div className="inline-flex rounded-lg border border-surface0 overflow-hidden">
           <button
             key="niche"
