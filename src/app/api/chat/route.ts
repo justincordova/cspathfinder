@@ -97,7 +97,7 @@ function buildDataContext(userMessage: string): string | null {
   if (/\b(food|dining|cafeteria|meal|eat)\b/.test(q)) {
     gradeKey = "campusFood";
     metricLabel = "campus food";
-  } else if (/\b(safe|unsafe|safety|danger|dangerous|crime)\b/.test(q)) {
+  } else if (/\b(safe(?:st)?|unsafe|safety|danger(?:ous)?|crime)\b/.test(q)) {
     gradeKey = "safety";
     metricLabel = "safety";
   } else if (/\b(dorm|dorms|housing|residence hall)\b/.test(q)) {
@@ -112,7 +112,7 @@ function buildDataContext(userMessage: string): string | null {
   } else if (/\b(divers|inclusion|inclusive)\b/.test(q)) {
     gradeKey = "diversity";
     metricLabel = "diversity";
-  } else if (/\b(professor|faculty|teacher|instruction|teaching)\b/.test(q)) {
+  } else if (/\b(professors?|faculty|teacher|instruction|teaching)\b/.test(q)) {
     gradeKey = "professors";
     metricLabel = "professors";
   } else if (/\b(athletic|sport|sports|gym)\b/.test(q)) {
@@ -141,7 +141,7 @@ function buildDataContext(userMessage: string): string | null {
   }
 
   // --- Tuition queries ---
-  const hasTuition = /\b(tuition|cost|cheap|afford|expensive|price|inexpensive)\b/.test(q);
+  const hasTuition = /\b(tuition|cost|cheap(?:est)?|afford|expensive|price|inexpensive)\b/.test(q);
   if (hasTuition) {
     const outOfState = /\b(out.of.state|nonresident|non-resident)\b/.test(q);
     const field: "tuitionInState" | "tuitionOutOfState" = outOfState
@@ -157,7 +157,7 @@ function buildDataContext(userMessage: string): string | null {
   }
 
   // --- Earnings ---
-  const hasEarnings = /\b(earn|salary|salaries|income|pay|wage|money after)\b/.test(q);
+  const hasEarnings = /\b(earnings?|salary|salaries|income|pay|wage|money after)\b/.test(q);
   if (hasEarnings) {
     const isHigh = /\b(high|highest|best|most|top)\b/.test(q);
     const isLow = /\b(low|lowest|worst|least)\b/.test(q);

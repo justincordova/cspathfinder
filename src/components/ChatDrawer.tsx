@@ -204,7 +204,6 @@ export default function ChatDrawer() {
         }),
         signal: abortController.signal,
       });
-      clearTimeout(timeoutId);
 
       let data: { reply?: string; error?: string };
       try {
@@ -457,9 +456,11 @@ export default function ChatDrawer() {
               ))}
 
               {loading && (
-                <div className="flex justify-start">
+                <div className="flex justify-start" role="status" aria-label="AI is typing">
                   <div className="bg-surface0 px-3 py-2 rounded-lg text-sm">
-                    <p className="text-subtext0">Typing{".".repeat(typingDots || 1)}</p>
+                    <p className="text-subtext0" aria-hidden="true">
+                      Typing{".".repeat(typingDots || 1)}
+                    </p>
                   </div>
                 </div>
               )}
