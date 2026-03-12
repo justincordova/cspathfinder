@@ -1,167 +1,184 @@
 /**
  * Common abbreviations, nicknames, and alternate names for schools.
- * Keys must match the slug field in schools.json exactly.
+ * Keys must match the slug field in niche-schools.json / csrankings-schools.json exactly.
  * Values are lowercase aliases to match against search queries.
  * The school's own name/city/state/slug fields are already searched — only add things
  * that differ meaningfully from those fields.
  */
 export const SCHOOL_ALIASES: Record<string, string[]> = {
-  // ── A ─────────────────────────────────────────────────────────────────
-  alabama: ["bama", "crimson tide", "roll tide"],
-  asu: ["arizona state", "sun devils", "tempe"],
-  auburn: ["war eagle", "tigers"],
-
-  // ── B ─────────────────────────────────────────────────────────────────
-  baylor: ["bears", "waco"],
-  "boston-u": ["bu", "terriers", "beantown"],
-  brown: ["brunonians"],
-
-  // ── C ─────────────────────────────────────────────────────────────────
-  caltech: ["cal tech", "california tech", "cit"],
-  "carnegie-mellon": ["cmu", "carnegie mellon university", "tartans"],
-  "case-western": ["cwru", "case", "spartan"],
-  clemson: ["tigers"],
-  columbia: ["columbia nyc", "lions"],
-  cornell: ["big red", "cu"],
-  csu: ["colorado state", "rams", "fort collins"],
-  "cu-boulder": ["cu", "buffaloes", "colorado boulder", "university of colorado"],
-
-  // ── D ─────────────────────────────────────────────────────────────────
-  dartmouth: ["big green", "hanover"],
-  delaware: ["ud", "blue hens", "fightin blue hens"],
-  duke: ["blue devils"],
-
-  // ── E ─────────────────────────────────────────────────────────────────
-  emory: ["eagles"],
-
-  // ── F ─────────────────────────────────────────────────────────────────
-  fsu: ["seminoles", "noles", "florida state", "tallahassee"],
-
-  // ── G ─────────────────────────────────────────────────────────────────
-  "george-mason": ["gmu", "mason", "patriots", "fairfax"],
-  "georgia-tech": ["gt", "gatech", "ga tech", "yellow jackets"],
-  gwu: ["gw", "george washington", "colonials"],
-
-  // ── H ─────────────────────────────────────────────────────────────────
-  harvard: ["crimson"],
-
-  // ── I ─────────────────────────────────────────────────────────────────
-  iit: ["illinois tech", "illinois institute of technology", "chicago tech"],
-  indiana: ["iu", "hoosiers", "bloomington"],
-  iowa: ["hawkeyes", "iowa city"],
-  "iowa-state": ["isu", "cyclones", "ames"],
-
-  // ── J ─────────────────────────────────────────────────────────────────
-  "johns-hopkins": ["jhu", "hopkins", "blue jays"],
-
-  // ── K ─────────────────────────────────────────────────────────────────
-  kstate: ["k-state", "kansas state", "wildcats", "manhattan ks"],
-  ku: ["kansas", "jayhawks", "lawrence ks"],
-
-  // ── L ─────────────────────────────────────────────────────────────────
-  lehigh: ["mountain hawks", "bethlehem"],
-  lsu: ["tigers", "baton rouge", "louisiana state"],
-
-  // ── M ─────────────────────────────────────────────────────────────────
-  michigan: ["umich", "wolverines", "ann arbor", "u of m"],
-  "michigan-state": ["msu", "spartans", "east lansing"],
-  mines: ["csm", "colorado mines", "orediggers", "golden co"],
-  mit: ["massachusetts institute of technology"],
-  mizzou: ["missouri", "tigers", "columbia mo"],
-
-  // ── N ─────────────────────────────────────────────────────────────────
-  "nc-state": ["ncsu", "wolfpack", "raleigh", "north carolina state"],
-  ncat: ["nc a&t", "north carolina a&t", "aggies", "greensboro"],
-  njit: ["nj tech", "new jersey tech", "new jersey institute of technology", "highlanders"],
-  northeastern: ["neu", "huskies"],
-  northwestern: ["nu", "wildcats", "evanston"],
-  "notre-dame": ["nd", "fighting irish", "south bend"],
-  nyu: ["new york u", "violets"],
-
-  // ── O ─────────────────────────────────────────────────────────────────
-  "ohio-state": ["osu", "buckeyes", "columbus"],
-  okstate: ["osu", "cowboys", "stillwater", "oklahoma state"],
-  "oregon-state": ["osu", "beavers", "corvallis"],
-  ou: ["oklahoma", "sooners", "norman ok"],
-
-  // ── P ─────────────────────────────────────────────────────────────────
-  "penn-state": ["psu", "nittany lions", "state college", "happy valley"],
-  pitt: ["panthers", "pittsburgh"],
-  princeton: ["tigers"],
-  purdue: ["boilermakers", "west lafayette"],
-
-  // ── R ─────────────────────────────────────────────────────────────────
-  rice: ["owls", "houston tx"],
-  rit: ["rochester tech", "rochester institute of technology", "tigers"],
-  rochester: ["u of r", "yellowjackets"],
-  rpi: ["rensselaer", "rensselaer polytechnic", "troy ny"],
-  rutgers: ["scarlet knights", "rug"],
-
-  // ── S ─────────────────────────────────────────────────────────────────
-  stanford: ["su", "the farm", "cardinal", "palo alto"],
-  stevens: ["sit", "stevens tech", "hoboken"],
-  "stony-brook": ["sbu", "suny stony brook", "stonybrook"],
-  syracuse: ["cuse", "orange"],
-
-  // ── T ─────────────────────────────────────────────────────────────────
-  tamu: ["texas a&m", "texas a and m", "a&m", "aggies", "college station"],
-  temple: ["owls"],
-  tufts: ["jumbos", "medford"],
-  tulane: ["green wave", "new orleans"],
-
-  // ── U ─────────────────────────────────────────────────────────────────
-  "u-arizona": ["ua", "wildcats", "tucson", "arizona"],
-  "uc-berkeley": ["ucb", "cal", "bears", "berkeley"],
-  "uc-davis": ["ucd", "aggies", "davis"],
-  uci: ["uc irvine", "irvine", "anteaters"],
-  ucla: ["bruins", "uc la"],
-  uconn: ["huskies", "storrs", "connecticut"],
-  ucr: ["uc riverside", "riverside", "highlanders"],
-  ucsb: ["uc santa barbara", "santa barbara", "gauchos"],
-  ucsc: ["uc santa cruz", "santa cruz", "banana slugs"],
-  ucsd: ["uc san diego", "san diego", "tritons"],
-  uf: ["gators", "gainesville", "florida"],
-  uic: ["illinois chicago", "flames"],
-  uiuc: ["illinois", "u of i", "champaign", "urbana", "fighting illini", "university of illinois"],
-  uky: ["kentucky", "wildcats", "lexington ky"],
-  umass: ["amherst", "minutemen", "u mass"],
-  // University of Maryland — College Park (only MD campus in dataset)
-  // "umd" also catches UMBC / UMGC queries since those campuses share the UMD system
-  umd: [
+  "massachusetts-institute-of-technology": ["mit"],
+  "stanford-university": ["su", "the farm", "stanford", "cardinal", "palo alto"],
+  "carnegie-mellon-university": ["cmu", "carnegie mellon"],
+  "university-of-california-berkeley": ["ucb", "cal", "uc berkeley", "berkeley"],
+  "university-of-illinois-urbana-champaign": [
+    "uiuc",
+    "u of i",
+    "champaign",
+    "urbana",
+    "urbana-champaign",
+    "illinois",
+    "fighting illini",
+  ],
+  "california-institute-of-technology": ["caltech", "cal tech", "cit", "california tech"],
+  "georgia-institute-of-technology": ["gt", "gatech", "ga tech", "georgia tech", "yellow jackets"],
+  "cornell-university": ["cu", "big red", "cornell tech"],
+  "university-of-washington": ["uw", "uw seattle", "u dub", "washington", "huskies"],
+  "university-of-texas-at-austin": ["ut", "ut austin", "longhorns", "texas", "university of texas"],
+  "university-of-california-los-angeles": ["ucla", "uc la", "bruins"],
+  "university-of-michigan-ann-arbor": ["umich", "u of m", "ann arbor", "michigan", "wolverines"],
+  "columbia-university": ["cu nyc", "columbia nyc", "lions"],
+  "university-of-california-san-diego": ["ucsd", "uc san diego", "san diego", "tritons"],
+  "university-of-wisconsin-madison": [
+    "uw madison",
+    "wisc",
+    "wisconsin",
+    "university of wisconsin",
+    "madison",
+    "badgers",
+  ],
+  // University of Maryland — College Park
+  "university-of-maryland-college-park": [
+    "umd",
+    "umcp",
+    "college park",
     "maryland",
     "terps",
     "terrapins",
-    "college park",
-    "umcp",
+  ],
+  // University of Maryland — Baltimore County
+  "university-of-maryland-baltimore-county": [
+    "umd",
     "umbc",
     "baltimore county",
-    "university of maryland baltimore county",
-    "umgc",
-    "global campus",
-    "university of maryland global campus",
+    "maryland baltimore",
+    "retrievers",
   ],
-  umn: ["minnesota", "gophers", "twin cities", "u of m"],
-  unc: ["north carolina", "tar heels", "chapel hill"],
-  unl: ["nebraska", "cornhuskers", "lincoln ne"],
-  upenn: ["penn", "wharton", "quakers"],
-  usc: ["trojans", "southern cal", "southern california"],
-  usf: ["south florida", "bulls", "tampa"],
-  "ut-austin": ["ut", "longhorns", "texas", "university of texas"],
-  "ut-dallas": ["utd", "comets", "richardson"],
-  utah: ["utes", "salt lake", "slc"],
-  utk: ["tennessee", "vols", "volunteers", "knoxville"],
-  uva: ["virginia", "cavaliers", "wahoos", "hoos", "charlottesville"],
-  uw: ["washington", "huskies", "seattle", "u dub"],
-  "uw-madison": ["wisconsin", "badgers", "madison"],
-
-  // ── V ─────────────────────────────────────────────────────────────────
-  vanderbilt: ["vandy", "commodores"],
-  "virginia-tech": ["vt", "hokies", "blacksburg", "virginia polytechnic"],
-
-  // ── W ─────────────────────────────────────────────────────────────────
-  wpi: ["worcester polytechnic", "worcester", "engineers"],
-  wsu: ["washington state", "cougars", "cougs", "pullman wa"],
-
-  // ── Y ─────────────────────────────────────────────────────────────────
-  yale: ["bulldogs", "new haven"],
+  // University of Maryland — Global Campus
+  "university-of-maryland-global-campus": ["umd", "umgc", "global campus", "maryland global"],
+  "purdue-university": ["purdue", "boilermakers", "west lafayette"],
+  "university-of-pennsylvania": ["upenn", "u penn", "penn", "wharton", "quakers"],
+  "university-of-southern-california": ["usc", "southern cal", "southern california", "trojans"],
+  "new-york-university": ["nyu", "new york u", "violets"],
+  "virginia-tech": ["vt", "va tech", "hokies", "virginia polytechnic"],
+  "nc-state-university": ["ncsu", "nc state", "north carolina state", "wolfpack"],
+  "the-ohio-state-university": ["osu", "ohio state", "buckeyes", "columbus"],
+  "penn-state": ["psu", "penn state", "nittany lions", "state college", "happy valley"],
+  "university-of-massachusetts-amherst": [
+    "umass",
+    "umass amherst",
+    "amherst",
+    "u mass",
+    "minutemen",
+  ],
+  "rutgers-universitynew-brunswick": [
+    "rutgers",
+    "rug",
+    "scarlet knights",
+    "new brunswick",
+    "rutgers university",
+  ],
+  "new-jersey-institute-of-technology": [
+    "njit",
+    "nj tech",
+    "new jersey tech",
+    "new jersey institute of technology",
+    "highlanders",
+  ],
+  "rensselaer-polytechnic-institute": ["rpi", "rensselaer", "rensselaer polytechnic", "troy"],
+  "stony-brook-university": ["stony brook", "suny stony brook", "sbu", "stonybrook"],
+  "boston-university": ["bu", "beantown", "terriers"],
+  "northeastern-university": ["neu", "northeastern", "huskies"],
+  "university-of-minnesota-twin-cities": ["umn", "u of m", "twin cities", "minnesota", "gophers"],
+  "iowa-state-university": ["isu", "iowa state", "cyclones", "ames"],
+  "arizona-state-university": ["asu", "arizona state", "tempe", "sun devils"],
+  "university-of-texas-dallas": ["utd", "ut dallas", "comets", "richardson"],
+  "university-of-florida": ["uf", "gators", "gainesville", "florida"],
+  "university-of-california-irvine": ["uci", "uc irvine", "irvine", "anteaters"],
+  "university-of-california-davis": ["uc davis", "davis", "aggies", "ucd"],
+  "university-of-california-santa-barbara": [
+    "ucsb",
+    "uc santa barbara",
+    "santa barbara",
+    "gauchos",
+  ],
+  "university-of-california-santa-cruz": ["ucsc", "uc santa cruz", "santa cruz", "banana slugs"],
+  "colorado-school-of-mines": ["csm", "mines", "golden", "colorado mines", "orediggers"],
+  "clemson-university": ["clemson", "tigers"],
+  "michigan-state-university": ["msu", "spartans", "east lansing"],
+  "indiana-university-bloomington": ["iu", "indiana university", "bloomington", "hoosiers"],
+  "university-of-pittsburgh": ["pitt", "pittsburgh", "panthers"],
+  "syracuse-university": ["cuse", "orange"],
+  "stevens-institute-of-technology": ["sit", "stevens tech", "hoboken"],
+  "worcester-polytechnic-institute": [
+    "wpi",
+    "worcester polytechnic",
+    "worcester",
+    "worcester poly",
+    "engineers",
+  ],
+  "rochester-institute-of-technology": ["rit", "rochester tech", "rochester institute", "tigers"],
+  "george-mason-university": ["gmu", "mason", "fairfax", "patriots"],
+  "university-of-colorado-boulder": [
+    "cu boulder",
+    "cu",
+    "colorado boulder",
+    "boulder",
+    "buffaloes",
+    "university of colorado",
+  ],
+  "oregon-state-university": ["osu", "corvallis", "beavers"],
+  "washington-state-university": ["wsu", "pullman", "cougs", "cougars", "washington state"],
+  "florida-state-university": ["fsu", "tallahassee", "noles", "seminoles", "florida state"],
+  "university-of-arizona": ["ua", "tucson", "wildcats", "arizona"],
+  "university-of-utah": ["utah", "salt lake", "slc", "utes"],
+  "johns-hopkins-university": ["jhu", "johns hopkins", "hopkins", "blue jays"],
+  "university-of-virginia": ["uva", "virginia", "wahoos", "hoos", "charlottesville", "cavaliers"],
+  "university-of-notre-dame": ["nd", "notre dame", "fighting irish", "south bend"],
+  "university-of-rochester": ["u of r", "yellowjackets"],
+  "case-western-reserve-university": ["cwru", "case western", "case"],
+  "george-washington-university": ["gwu", "gw", "george washington", "colonials"],
+  "university-of-illinois-chicago": ["uic", "illinois chicago", "flames"],
+  "university-of-connecticut": ["uconn", "storrs", "huskies", "connecticut"],
+  "university-of-delaware": ["ud", "blue hens", "delaware"],
+  "university-of-iowa": ["iowa", "iowa city", "hawkeyes"],
+  "university-of-tennessee": ["utk", "knoxville", "vols", "volunteers", "tennessee"],
+  "university-of-nebraska-lincoln": ["unl", "nebraska", "lincoln", "cornhuskers"],
+  "kansas-state-university": ["kstate", "ksu", "manhattan", "wildcats", "kansas state"],
+  "university-of-kansas": ["ku", "lawrence", "jayhawks", "kansas"],
+  "texas-am-university": ["tamu", "texas a&m", "texas a and m", "a&m", "aggies", "college station"],
+  "university-of-north-carolina-at-chapel-hill": [
+    "unc",
+    "north carolina",
+    "chapel hill",
+    "tar heels",
+  ],
+  "university-of-california-riverside": ["ucr", "uc riverside", "riverside", "highlanders"],
+  "colorado-state-university": ["csu", "fort collins", "rams", "colorado state"],
+  "university-of-south-florida": ["usf", "south florida", "tampa", "bulls"],
+  "north-carolina-agricultural-and-technical-state-university": [
+    "ncat",
+    "nc a&t",
+    "a&t",
+    "north carolina a&t",
+    "greensboro",
+    "aggies",
+  ],
+  "illinois-institute-of-technology": ["iit", "illinois tech", "chicago tech", "scarlet hawks"],
+  "auburn-university": ["auburn", "war eagle", "tigers"],
+  "university-of-kentucky": ["uky", "kentucky", "lexington", "wildcats"],
+  "university-of-missouri": ["mizzou", "columbia mo", "tigers", "missouri"],
+  "louisiana-state-university": ["lsu", "baton rouge", "tigers", "louisiana state"],
+  "oklahoma-state-university": ["okstate", "osu", "stillwater", "cowboys", "oklahoma state"],
+  "university-of-oklahoma": ["ou", "norman", "sooners", "oklahoma"],
+  "university-of-alabama": ["bama", "tide", "crimson tide", "tuscaloosa", "alabama"],
+  "binghamton-university-suny": ["binghamton", "suny binghamton", "bearcats"],
+  "university-at-buffalo-suny": ["ub", "university at buffalo", "buffalo", "suny buffalo", "bulls"],
+  "drexel-university": ["drexel", "dragons"],
+  "temple-university": ["temple", "owls", "philadelphia"],
+  "vanderbilt-university": ["vandy", "commodores"],
+  "university-of-miami": ["um", "the u", "coral gables", "hurricanes"],
+  "howard-university": ["howard", "hbcu", "bison"],
+  "university-of-new-mexico": ["unm", "albuquerque", "new mexico", "lobos"],
+  "university-of-nevada-las-vegas": ["unlv", "las vegas", "rebels"],
+  "university-of-hawaii-at-manoa": ["uhm", "uh manoa", "manoa", "hawaii", "warriors"],
 };
