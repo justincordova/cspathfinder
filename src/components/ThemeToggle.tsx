@@ -6,10 +6,19 @@ export default function ThemeToggle() {
   const [theme, setTheme] = useState<"latte" | "mocha">("mocha");
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme") as "latte" | "mocha" | null;
-    if (saved && saved !== "mocha") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTheme(saved);
+    try {
+      const saved = localStorage.getItem("theme") as "latte" | "mocha" | null;
+      if (saved === "latte" || saved === "mocha") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTheme(saved);
+      } else {
+        // No saved preference — respect prefers-color-scheme
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        setTheme(prefersDark ? "mocha" : "latte");
+      }
+    } catch {
+      // localStorage may be unavailable; keep default
     }
   }, []);
 

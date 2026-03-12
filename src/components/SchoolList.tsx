@@ -133,8 +133,10 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     setPreviousFilters(null);
   }, [previousFilters]);
 
-  const schools = (rankSource === "niche" ? nicheSchools : csrankingsSchools).filter(
-    (school) => school.state
+  const schools = useMemo(
+    () =>
+      (rankSource === "niche" ? nicheSchools : csrankingsSchools).filter((school) => school.state),
+    [rankSource, nicheSchools, csrankingsSchools]
   );
 
   const states = useMemo(() => {
@@ -417,7 +419,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       </div>
 
       {/* Results count */}
-      <p className="text-sm text-subtext0" aria-live="assertive" aria-atomic="true">
+      <p className="text-sm text-subtext0" aria-live="polite" aria-atomic="true">
         {isFiltering ? "Filtering..." : `${result.totalCount} schools`}
       </p>
 

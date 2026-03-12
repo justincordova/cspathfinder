@@ -42,6 +42,21 @@ export default function ChatDrawer() {
     if (isOpen) setHasBeenOpened(true);
   }, [isOpen]);
 
+  // Move focus into the drawer when it opens for keyboard/screen reader accessibility
+  useEffect(() => {
+    if (!isOpen) return;
+    // Wait for the drawer to be rendered and the CSS transition to begin
+    const id = setTimeout(() => {
+      const focusableElements = drawerRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusableElements && focusableElements.length > 0) {
+        focusableElements[0].focus();
+      }
+    }, 50);
+    return () => clearTimeout(id);
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen) {
       const isMobile = window.innerWidth < 768;
