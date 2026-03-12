@@ -12,6 +12,7 @@ import SchoolLogo from "./SchoolLogo";
 import { useChatContext } from "./ChatProvider";
 import HeartButton from "./HeartButton";
 import CompareButton from "./CompareButton";
+import Select from "./Select";
 
 const ROIChart = dynamic(() => import("./ROIChart"), { ssr: false });
 
@@ -347,54 +348,26 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
             </button>
           )}
         </div>
-        <div className="relative">
-          <select
-            value={stateFilter}
-            onChange={(e) => updateFilter(setStateFilter, e.target.value)}
-            className="appearance-none px-4 py-2 pr-8 bg-mantle border border-surface0 rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-150 ease-out cursor-pointer hover:border-subtext0"
-            aria-label="Filter by state"
-          >
-            <option value="">All States</option>
-            {states.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-          <svg
-            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-4 h-4 text-subtext0"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </div>
-        <div className="relative">
-          <select
-            value={regionFilter}
-            onChange={(e) => updateFilter(setRegionFilter, e.target.value)}
-            className="appearance-none px-4 py-2 pr-8 bg-mantle border border-surface0 rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-150 ease-out cursor-pointer hover:border-subtext0"
-            aria-label="Filter by region"
-          >
-            <option value="">All Regions</option>
-            {regions.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-          <svg
-            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-4 h-4 text-subtext0"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </div>
+        <Select
+          value={stateFilter}
+          onChange={(v) => updateFilter(setStateFilter, v)}
+          placeholder="All States"
+          aria-label="Filter by state"
+          options={[
+            { value: "", label: "All States" },
+            ...states.map((s) => ({ value: s, label: s })),
+          ]}
+        />
+        <Select
+          value={regionFilter}
+          onChange={(v) => updateFilter(setRegionFilter, v)}
+          placeholder="All Regions"
+          aria-label="Filter by region"
+          options={[
+            { value: "", label: "All Regions" },
+            ...regions.map((r) => ({ value: r, label: r })),
+          ]}
+        />
       </div>
 
       {/* Ranking source toggle */}
