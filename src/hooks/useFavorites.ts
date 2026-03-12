@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const STORAGE_KEY = "cspathfinder-favorites";
 
 function readFromStorage(): Set<string> {
-  if (typeof window === "undefined") return new Set();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return new Set();
@@ -26,7 +25,11 @@ function writeToStorage(favorites: Set<string>): void {
 }
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<Set<string>>(readFromStorage);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  // Hydrate from localStorage after mount to avoid SSR mismatch
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setFavorites(readFromStorage()), []);
 
   const toggle = useCallback((slug: string) => {
     setFavorites((prev) => {
