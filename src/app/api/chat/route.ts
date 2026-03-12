@@ -57,8 +57,7 @@ const SYSTEM_PROMPT_TTL_MS = 5 * 60 * 1000; // 5 minutes
 let cachedSystemPrompt: string | null = null;
 let cachedSystemPromptAt = 0;
 
-// Pre-compute top/bottom N schools for a given numeric extractor so the AI
-// never has to scan raw data — we hand it the answer directly.
+// Sorted school names by a numeric scorer, desc=true means highest first.
 function topN(schools: School[], n: number, score: (s: School) => number, desc: boolean): string {
   return [...schools]
     .sort((a, b) => (desc ? score(b) - score(a) : score(a) - score(b)))
@@ -67,57 +66,149 @@ function topN(schools: School[], n: number, score: (s: School) => number, desc: 
     .join(", ");
 }
 
+// Shared schools cache — loaded once per process.
+let cachedSchools: School[] | null = null;
+function getSchools(): School[] {
+  if (cachedSchools) return cachedSchools;
+  try {
+    cachedSchools = loadSchools();
+  } catch (err) {
+    logError("Failed to load schools", err);
+    cachedSchools = [];
+  }
+  return cachedSchools;
+}
+
+// Detect if the user's message is asking for a best/worst data fact and, if so,
+// return a short context string (appended to their message) with the pre-computed
+// answer. This is injected directly into the conversation so the AI cannot ignore
+// it the way it ignores system-prompt instructions.
+function buildDataContext(userMessage: string): string | null {
+  const q = userMessage.toLowerCase();
+  const schools = getSchools();
+  if (schools.length === 0) return null;
+
+  // --- Detect metric ---
+  type GradeKey = keyof School["nicheGrades"];
+  let gradeKey: GradeKey | null = null;
+  let metricLabel = "";
+
+  if (/\b(food|dining|cafeteria|meal|eat)\b/.test(q)) {
+    gradeKey = "campusFood";
+    metricLabel = "campus food";
+  } else if (/\b(safe|unsafe|safety|danger|dangerous|crime)\b/.test(q)) {
+    gradeKey = "safety";
+    metricLabel = "safety";
+  } else if (/\b(dorm|dorms|housing|residence hall)\b/.test(q)) {
+    gradeKey = "dorms";
+    metricLabel = "dorms";
+  } else if (/\b(party|parties|nightlife|social scene)\b/.test(q)) {
+    gradeKey = "partyScene";
+    metricLabel = "party scene";
+  } else if (/\b(student life|social life|clubs|activities)\b/.test(q)) {
+    gradeKey = "studentLife";
+    metricLabel = "student life";
+  } else if (/\b(divers|inclusion|inclusive)\b/.test(q)) {
+    gradeKey = "diversity";
+    metricLabel = "diversity";
+  } else if (/\b(professor|faculty|teacher|instruction|teaching)\b/.test(q)) {
+    gradeKey = "professors";
+    metricLabel = "professors";
+  } else if (/\b(athletic|sport|sports|gym)\b/.test(q)) {
+    gradeKey = "athletics";
+    metricLabel = "athletics";
+  } else if (/\b(value|bang for|worth)\b/.test(q)) {
+    gradeKey = "value";
+    metricLabel = "value";
+  } else if (/\b(location|neighborhood|area|surroundings)\b/.test(q)) {
+    gradeKey = "location";
+    metricLabel = "location";
+  } else if (/\b(academics?|education|learning quality)\b/.test(q)) {
+    gradeKey = "academics";
+    metricLabel = "academics";
+  }
+
+  if (gradeKey) {
+    const key = gradeKey;
+    const isWorst = /\b(worst|bad|lowest|least|poor|unsafe|dangerous|terrible|weakest)\b/.test(q);
+    const isBest = /\b(best|top|highest|safest|greatest|strongest|excellent|most)\b/.test(q);
+    if (!isWorst && !isBest) return null;
+    const desc = isBest; // desc=true → highest grade first (best); desc=false → lowest first (worst)
+    const names = topN(schools, 5, (s) => gradeToNumeric(s.nicheGrades[key]), desc);
+    const direction = isBest ? "best" : "worst";
+    return `\n\n[VERIFIED DATA: The 5 schools with the ${direction} ${metricLabel} rating in our database are: ${names}. Use these exact school names in your answer.]`;
+  }
+
+  // --- Tuition queries ---
+  const hasTuition = /\b(tuition|cost|cheap|afford|expensive|price|inexpensive)\b/.test(q);
+  if (hasTuition) {
+    const outOfState = /\b(out.of.state|nonresident|non-resident)\b/.test(q);
+    const field: "tuitionInState" | "tuitionOutOfState" = outOfState
+      ? "tuitionOutOfState"
+      : "tuitionInState";
+    const label = outOfState ? "out-of-state tuition" : "in-state tuition";
+    const isCheap = /\b(cheap|lowest|cheapest|affordable|least expensive|inexpensive)\b/.test(q);
+    const isExpensive = /\b(expensive|highest|most expensive|priciest|costliest)\b/.test(q);
+    if (!isCheap && !isExpensive) return null;
+    const names = topN(schools, 5, (s) => s[field], isExpensive);
+    const direction = isCheap ? "cheapest" : "most expensive";
+    return `\n\n[VERIFIED DATA: The 5 schools with the ${direction} ${label} in our database are: ${names}. Use these exact school names in your answer.]`;
+  }
+
+  // --- Earnings ---
+  const hasEarnings = /\b(earn|salary|salaries|income|pay|wage|money after)\b/.test(q);
+  if (hasEarnings) {
+    const isHigh = /\b(high|highest|best|most|top)\b/.test(q);
+    const isLow = /\b(low|lowest|worst|least)\b/.test(q);
+    if (!isHigh && !isLow) return null;
+    const names = topN(schools, 5, (s) => s.medianEarnings6yr ?? 0, isHigh);
+    const direction = isHigh ? "highest" : "lowest";
+    return `\n\n[VERIFIED DATA: The 5 schools with the ${direction} median earnings (6yr) in our database are: ${names}. Use these exact school names in your answer.]`;
+  }
+
+  // --- Acceptance rate ---
+  const hasAccept = /\b(accept|admit|selective|easy to get in|hard to get in|get into)\b/.test(q);
+  if (hasAccept) {
+    const isEasy = /\b(easiest|least selective|highest accept|easy to get)\b/.test(q);
+    const isHard = /\b(hardest|most selective|lowest accept|hard to get)\b/.test(q);
+    if (!isEasy && !isHard) return null;
+    const names = topN(schools, 5, (s) => s.acceptanceRate, isEasy);
+    const direction = isEasy
+      ? "highest acceptance rate (easiest to get into)"
+      : "lowest acceptance rate (hardest to get into)";
+    return `\n\n[VERIFIED DATA: The 5 schools with the ${direction} in our database are: ${names}. Use these exact school names in your answer.]`;
+  }
+
+  // --- ROI ---
+  const hasROI = /\b(roi|return on investment|payback|pay.?back|bang for)\b/.test(q);
+  if (hasROI) {
+    const isBestROI = /\b(best|top|highest|greatest)\b/.test(q);
+    const isWorstROI = /\b(worst|lowest|poorest)\b/.test(q);
+    if (!isBestROI && !isWorstROI) return null;
+    // Best ROI = lowest payback years
+    const names = topN(
+      schools,
+      5,
+      (s) => {
+        const e = s.medianEarnings6yr;
+        if (!e || e <= 0) return isBestROI ? Infinity : -Infinity;
+        return ((s.tuitionInState + s.roomAndBoard) * 4) / e;
+      },
+      isWorstROI // desc=true for worst ROI (highest payback years)
+    );
+    const direction = isBestROI ? "best" : "worst";
+    return `\n\n[VERIFIED DATA: The 5 schools with the ${direction} ROI in our database are: ${names}. Use these exact school names in your answer.]`;
+  }
+
+  return null;
+}
+
 function buildSystemPrompt(): string {
   if (cachedSystemPrompt && Date.now() - cachedSystemPromptAt < SYSTEM_PROMPT_TTL_MS) {
     return cachedSystemPrompt;
   }
-  let schools: ReturnType<typeof loadSchools>;
-  try {
-    schools = loadSchools();
-  } catch (err) {
-    logError("Failed to load schools for system prompt", err);
-    schools = [];
-  }
+  const schools = getSchools();
   const totalCount = schools.length;
-  const N = 5;
-
-  // Pre-computed rankings — these are the definitive answers for superlative queries
-  const rankings = `PRE-COMPUTED RANKINGS (use these exact school names for best/worst questions):
-Food: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.campusFood), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.campusFood), false)}
-Safety: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.safety), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.safety), false)}
-Dorms: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.dorms), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.dorms), false)}
-Party: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.partyScene), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.partyScene), false)}
-Social/Student Life: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.studentLife), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.studentLife), false)}
-Diversity: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.diversity), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.diversity), false)}
-Professors: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.professors), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.professors), false)}
-Athletics: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.athletics), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.athletics), false)}
-Value: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.value), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.value), false)}
-Location: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.location), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.location), false)}
-Academics: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.academics), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.academics), false)}
-Overall: best=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.overall), true)} | worst=${topN(schools, N, (s) => gradeToNumeric(s.nicheGrades.overall), false)}
-In-state tuition: cheapest=${topN(schools, N, (s) => s.tuitionInState, false)} | most expensive=${topN(schools, N, (s) => s.tuitionInState, true)}
-Out-of-state tuition: cheapest=${topN(schools, N, (s) => s.tuitionOutOfState, false)} | most expensive=${topN(schools, N, (s) => s.tuitionOutOfState, true)}
-Earnings (6yr): highest=${topN(schools, N, (s) => s.medianEarnings6yr ?? 0, true)} | lowest=${topN(schools, N, (s) => s.medianEarnings6yr ?? Infinity, false)}
-Acceptance rate: easiest=${topN(schools, N, (s) => s.acceptanceRate, true)} | hardest=${topN(schools, N, (s) => s.acceptanceRate, false)}
-ROI (payback yrs): best=${topN(
-    schools,
-    N,
-    (s) => {
-      const e = s.medianEarnings6yr;
-      if (!e || e <= 0) return Infinity;
-      return ((s.tuitionInState + s.roomAndBoard) * 4) / e;
-    },
-    false
-  )} | worst=${topN(
-    schools,
-    N,
-    (s) => {
-      const e = s.medianEarnings6yr;
-      if (!e || e <= 0) return -Infinity;
-      return ((s.tuitionInState + s.roomAndBoard) * 4) / e;
-    },
-    true
-  )}`;
 
   const dataStr = schools
     .map((s) => {
@@ -129,18 +220,14 @@ ROI (payback yrs): best=${topN(
     })
     .join("\n");
 
-  const prompt = `You are CSPathFinder AI. Help students find CS programs.
-
-CRITICAL: For ALL best/worst/top/cheapest/most questions, you MUST use the PRE-COMPUTED RANKINGS section below. Do NOT scan the raw school data. Do NOT use your training knowledge. The pre-computed rankings are the authoritative answers — copy the school names from there exactly.
-
-${rankings}
+  const prompt = `You are CSPathFinder AI. Help students find CS programs. You have data on ${totalCount} schools.
 
 RULES:
 - For single-school or simple questions: 2-3 sentences max.
 - For comparisons of 2+ schools: up to 6-8 sentences. Use a short bullet list with **School Name**: key differentiator format for easy scanning.
 - Never dump raw stats — the app shows those. Focus on qualitative insight.
 - Use **bold** for school names only.
-- For superlative questions ("best X", "worst X", "cheapest", "safest", "least safe", etc.): look up the answer in PRE-COMPUTED RANKINGS above and name exactly those 5 schools.
+- When the user's message includes a [VERIFIED DATA: ...] block, you MUST use those exact school names. Do not substitute, reorder, or replace them with schools from your training knowledge.
 - Always emit a filter block when sorting/filtering helps (no explanation needed):
 \`\`\`filter
 {"sortBy": "...", "sortDir": "..."}
@@ -227,6 +314,15 @@ export async function POST(req: NextRequest) {
 
     const { messages } = parsed.data;
     const systemPrompt = buildSystemPrompt();
+
+    // Inject pre-computed data answer directly into the last user message so the
+    // model cannot ignore it. This prevents hallucination on data-lookup questions.
+    const lastMsg = messages[messages.length - 1];
+    const dataContext = lastMsg.role === "user" ? buildDataContext(lastMsg.content) : null;
+    const augmentedMessages = dataContext
+      ? [...messages.slice(0, -1), { role: lastMsg.role, content: lastMsg.content + dataContext }]
+      : messages;
+
     log.debug("Sending chat request", { messageCount: messages.length, model: MODEL });
 
     const MAX_RETRIES = 3;
@@ -250,7 +346,7 @@ export async function POST(req: NextRequest) {
         const completion = (await Promise.race([
           getClient().chat.completions.create({
             model: MODEL,
-            messages: [{ role: "system", content: systemPrompt }, ...messages],
+            messages: [{ role: "system", content: systemPrompt }, ...augmentedMessages],
             max_tokens: 2048,
             // @ts-expect-error: signal parameter might not be recognized by older OpenAI types
             signal: controller.signal,
