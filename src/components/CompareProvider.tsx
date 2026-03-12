@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  type ReactNode,
+} from "react";
 
 const MAX_COMPARE = 3;
 const STORAGE_KEY = "cspathfinder-compare";
@@ -72,8 +80,11 @@ export default function CompareProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setEntries(readFromStorage()), []);
 
-  const slugs = entries.map((e) => e.slug);
-  const names: Record<string, string> = Object.fromEntries(entries.map((e) => [e.slug, e.name]));
+  const slugs = useMemo(() => entries.map((e) => e.slug), [entries]);
+  const names: Record<string, string> = useMemo(
+    () => Object.fromEntries(entries.map((e) => [e.slug, e.name])),
+    [entries]
+  );
 
   const add = useCallback((slug: string, name: string) => {
     setEntries((prev) => {
