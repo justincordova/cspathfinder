@@ -18,18 +18,13 @@ interface ROIChartProps {
 
 export default function ROIChart({ schools }: ROIChartProps) {
   const data = schools
-    .filter((s) => s.medianEarnings6yr && typeof s.medianEarnings6yr === "number")
+    .filter((s) => s.medianEarnings6yr != null && s.medianEarnings6yr > 0)
     .slice(0, 15)
     .map((s) => ({
-      name:
-        typeof s.name === "string"
-          ? s.name.length > 20
-            ? s.name.slice(0, 20) + "..."
-            : s.name
-          : "Unknown",
-      inStateTuition: typeof s.tuitionInState === "number" ? s.tuitionInState : 0,
-      outOfStateTuition: typeof s.tuitionOutOfState === "number" ? s.tuitionOutOfState : 0,
-      earnings: typeof s.medianEarnings6yr === "number" ? s.medianEarnings6yr : 0,
+      name: s.name.length > 20 ? s.name.slice(0, 20) + "..." : s.name,
+      inStateTuition: s.tuitionInState,
+      outOfStateTuition: s.tuitionOutOfState,
+      earnings: s.medianEarnings6yr as number,
     }));
 
   if (data.length === 0) {

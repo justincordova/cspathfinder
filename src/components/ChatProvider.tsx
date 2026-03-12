@@ -1,16 +1,9 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import type { ChatFilters as SchemaFilters } from "@/lib/data/schema";
 
-export interface ChatFilters {
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  state?: string;
-  region?: string;
-  search?: string;
-  rankSource?: "csrankings" | "niche";
-  compare?: { slug: string; name: string }[];
-}
+export type ChatFilters = SchemaFilters;
 
 export interface ChatContextType {
   isOpen: boolean;

@@ -108,10 +108,9 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     return "asc";
   });
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
-  const [isFiltering, setIsFiltering] = useState(false);
   const [showChart, setShowChart] = useState(false);
   const [listKey, setListKey] = useState(0);
-  const prevDebouncedSearchRef = useRef("");
+  const prevIsFilteringRef = useRef(false);
 
   const activeRankField: "csRanking" | "nicheRanking" =
     rankSource === "niche" ? "nicheRanking" : "csRanking";
@@ -267,19 +266,19 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     sortBy !== defaultSortField
   );
 
-  // Show filtering state when debounced search is different from current search
-  useEffect(() => {
-    setIsFiltering(debouncedSearch !== search);
-  }, [debouncedSearch, search]);
+  // Derive filtering state: true while the debounce hasn't caught up with the typed search
+  const isFiltering = debouncedSearch !== search;
 
   // Trigger list re-render animation when filters settle
   useEffect(() => {
-    const prevSearch = prevDebouncedSearchRef.current;
-    if (prevSearch !== debouncedSearch && !isFiltering) {
-      setListKey((prev) => prev + 1);
+    const wasFiltering = prevIsFilteringRef.current;
+    if (wasFiltering && !isFiltering) {
+      requestAnimationFrame(() => {
+        setListKey((prev) => prev + 1);
+      });
     }
-    prevDebouncedSearchRef.current = debouncedSearch;
-  }, [debouncedSearch, isFiltering]);
+    prevIsFilteringRef.current = isFiltering;
+  }, [isFiltering]);
 
   // Reset to page 1 when filters change
   const updateFilter = useCallback(

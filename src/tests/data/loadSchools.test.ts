@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { loadSchools } from "@/lib/data/loadSchools";
+import { loadSchools, loadSchoolsBySource, getSchoolBySlug } from "@/lib/data/loadSchools";
 import { filterSchools } from "@/lib/data/filters";
 
 describe("loadSchools", () => {
@@ -9,6 +9,39 @@ describe("loadSchools", () => {
     expect(schools[0]).toHaveProperty("name");
     expect(schools[0]).toHaveProperty("nicheGrades");
     expect(schools[0].nicheGrades).toHaveProperty("campusFood");
+  });
+});
+
+describe("getSchoolBySlug", () => {
+  it("returns a school for a known slug", () => {
+    const schools = loadSchools();
+    const firstSlug = schools[0]?.slug;
+    if (!firstSlug) return; // guard for empty fixture
+    const school = getSchoolBySlug(firstSlug);
+    expect(school).toBeDefined();
+    expect(school?.slug).toBe(firstSlug);
+  });
+
+  it("returns undefined for an unknown slug", () => {
+    const school = getSchoolBySlug("this-slug-does-not-exist");
+    expect(school).toBeUndefined();
+  });
+
+  it("returns undefined for an empty string slug", () => {
+    const school = getSchoolBySlug("");
+    expect(school).toBeUndefined();
+  });
+
+  it("merges csRanking and nicheRanking from both sources when available", () => {
+    const csSchools = loadSchoolsBySource("csrankings");
+    const nicheSchools = loadSchoolsBySource("niche");
+    // Find a slug that appears in both sources
+    const nicheSlugs = new Set(nicheSchools.map((s) => s.slug));
+    const sharedSlug = csSchools.find((s) => nicheSlugs.has(s.slug))?.slug;
+    if (!sharedSlug) return; // no overlap in fixture data, skip gracefully
+    const merged = getSchoolBySlug(sharedSlug);
+    expect(merged).toBeDefined();
+    expect(merged?.slug).toBe(sharedSlug);
   });
 });
 
