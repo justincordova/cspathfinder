@@ -98,35 +98,6 @@ export default function ChatDrawer() {
 
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // Hydrate chat history from localStorage after mount to avoid SSR mismatch
-  const chatHistoryLoaded = useRef(false);
-  useEffect(() => {
-    if (chatHistoryLoaded.current) return;
-    chatHistoryLoaded.current = true;
-    try {
-      const stored = localStorage.getItem("cspathfinder-chat-history");
-      if (!stored) return;
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        // Deduplicate messages by role+content and regenerate IDs
-        const seen = new Set<string>();
-        const deduped: Message[] = [];
-        for (const msg of parsed) {
-          const key = `${msg.role}:${msg.content}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            deduped.push({
-              ...msg,
-              id: String(nextIdRef.current++),
-            });
-          }
-        }
-        setMessages(deduped);
-      }
-    } catch {
-      // ignore parse errors
-    }
-  }, []);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [typingDots, setTypingDots] = useState(0);
@@ -136,22 +107,6 @@ export default function ChatDrawer() {
   messagesRef.current = messages;
   const nextIdRef = useRef(0);
   const newMsgId = () => String(nextIdRef.current++);
-
-  // Initialize nextIdRef based on existing message IDs to prevent duplicates
-  const nextIdInitialized = useRef(false);
-  useEffect(() => {
-    if (nextIdInitialized.current) return;
-    if (messages.length > 0) {
-      const maxId = messages.reduce((max, msg) => {
-        const id = parseInt(msg.id, 10);
-        return !isNaN(id) && id > max ? id : max;
-      }, -1);
-      if (maxId >= 0) {
-        nextIdRef.current = maxId + 1;
-      }
-    }
-    nextIdInitialized.current = true;
-  }, [messages]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -167,15 +122,6 @@ export default function ChatDrawer() {
     const interval = setInterval(() => setTypingDots((prev) => (prev + 1) % 4), 400);
     return () => clearInterval(interval);
   }, [loading]);
-
-  useEffect(() => {
-    try {
-      const toStore = messages.slice(-50);
-      localStorage.setItem("cspathfinder-chat-history", JSON.stringify(toStore));
-    } catch {
-      // ignore storage errors
-    }
-  }, [messages]);
 
   const sendMessage = async (overrideText?: string) => {
     const text = (overrideText ?? input).trim();
