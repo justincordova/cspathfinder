@@ -24,24 +24,47 @@ function writeToStorage(favorites: Set<string>): void {
   }
 }
 
+// Global state to sync across multiple hook usages
+let globalFavorites: Set<string> | null = null;
+const listeners = new Set<(favorites: Set<string>) => void>();
+
+function getInitialFavorites() {
+  if (globalFavorites === null) {
+    globalFavorites = typeof window !== "undefined" ? readFromStorage() : new Set();
+  }
+  return globalFavorites;
+}
+
+function setGlobalFavorites(next: Set<string>) {
+  globalFavorites = next;
+  writeToStorage(next);
+  listeners.forEach((l) => l(next));
+}
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   // Hydrate from localStorage after mount to avoid SSR mismatch
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setFavorites(readFromStorage()), []);
+  useEffect(() => {
+    const current = getInitialFavorites();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFavorites(current);
+
+    listeners.add(setFavorites);
+    return () => {
+      listeners.delete(setFavorites);
+    };
+  }, []);
 
   const toggle = useCallback((slug: string) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) {
-        next.delete(slug);
-      } else {
-        next.add(slug);
-      }
-      writeToStorage(next);
-      return next;
-    });
+    const prev = getInitialFavorites();
+    const next = new Set(prev);
+    if (next.has(slug)) {
+      next.delete(slug);
+    } else {
+      next.add(slug);
+    }
+    setGlobalFavorites(next);
   }, []);
 
   const isFavorited = useCallback((slug: string) => favorites.has(slug), [favorites]);
