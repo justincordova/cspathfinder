@@ -32,7 +32,7 @@ function parseFilterBlock(text: string): { cleanText: string; filters: ChatFilte
 }
 
 export default function ChatDrawer() {
-  const { isOpen, close, applyFilters } = useChatContext();
+  const { isOpen, close, applyFilters, schoolContext } = useChatContext();
   const router = useRouter();
   const pathname = usePathname();
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
@@ -96,7 +96,18 @@ export default function ChatDrawer() {
     return () => document.removeEventListener("keydown", handleTab);
   }, [isOpen]);
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("cspathfinder-chat-history");
+      if (!stored) return [];
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) return parsed as Message[];
+    } catch {
+      // ignore parse errors
+    }
+    return [];
+  });
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [typingDots, setTypingDots] = useState(0);
@@ -122,6 +133,15 @@ export default function ChatDrawer() {
     return () => clearInterval(interval);
   }, [loading]);
 
+  useEffect(() => {
+    try {
+      const toStore = messages.slice(-50);
+      localStorage.setItem("cspathfinder-chat-history", JSON.stringify(toStore));
+    } catch {
+      // ignore storage errors
+    }
+  }, [messages]);
+
   const sendMessage = async (overrideText?: string) => {
     const text = (overrideText ?? input).trim();
     if (!text || loading) return;
@@ -142,7 +162,14 @@ export default function ChatDrawer() {
     abortControllerRef.current = abortController;
 
     try {
-      const messagesToSend = newMessages.slice(-20);
+      let messagesToSend = newMessages.slice(-20);
+      if (schoolContext && messagesRef.current.length === 0) {
+        const contextMsg = {
+          role: "user" as const,
+          content: `I'm looking at ${schoolContext}'s profile.`,
+        };
+        messagesToSend = [contextMsg, ...messagesToSend];
+      }
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -246,6 +273,9 @@ export default function ChatDrawer() {
               isOpen ? "translate-x-0" : "translate-x-full"
             }`}
           >
+            <div className="md:hidden flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-surface1" />
+            </div>
             <div className="flex items-center justify-between p-4 border-b border-surface0">
               <h2 className="font-bold text-lg">CSPathFinder AI</h2>
               <div className="flex items-center gap-2">
@@ -281,7 +311,14 @@ export default function ChatDrawer() {
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 && (
                 <div className="text-center text-subtext0 py-8 space-y-3">
-                  <p className="font-bold">Ask me anything about CS programs</p>
+                  {schoolContext ? (
+                    <p className="font-bold text-text">
+                      I can see you&apos;re viewing <strong>{schoolContext}</strong>. Ask me
+                      anything about it or compare it with other schools.
+                    </p>
+                  ) : (
+                    <p className="font-bold">Ask me anything about CS programs</p>
+                  )}
                   <div className="space-y-2 text-sm">
                     {[
                       "Best CS school for food?",

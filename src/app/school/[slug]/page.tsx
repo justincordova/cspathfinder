@@ -7,6 +7,8 @@ import {
 } from "@/lib/data/loadSchools";
 import GradeBadge from "@/components/GradeBadge";
 import SchoolLogo from "@/components/SchoolLogo";
+import SchoolChatContext from "@/components/SchoolChatContext";
+import CopyLinkButton from "@/components/CopyLinkButton";
 import type { Metadata } from "next";
 import type { NicheGrades, NicheGradeType } from "@/lib/data/schema";
 
@@ -100,6 +102,7 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
 
   return (
     <div id="main-content" className="py-12 space-y-10">
+      <SchoolChatContext schoolName={school.name} />
       <div>
         <Link href="/" className="text-primary hover:underline text-sm mb-4 inline-block">
           ← Back to Rankings
@@ -171,6 +174,7 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
             Niche Profile
           </a>
         )}
+        <CopyLinkButton />
       </div>
     </div>
   );

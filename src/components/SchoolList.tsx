@@ -340,21 +340,40 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       {/* Ranking source toggle */}
       <div className="flex items-center gap-1 text-sm">
         <span className="text-subtext0 font-medium mr-1">Ranking:</span>
+        <span
+          className="text-subtext0 cursor-help mr-1"
+          title="Niche ranks based on student reviews; CSRankings ranks based on faculty research publications"
+          aria-label="Ranking source info"
+        >
+          ⓘ
+        </span>
         <div className="inline-flex rounded-lg border border-surface0 overflow-hidden">
-          {(["niche", "csrankings"] as const).map((src) => (
-            <button
-              key={src}
-              onClick={() => handleRankSourceChange(src)}
-              className={`px-3 py-1 text-xs font-medium transition-colors ${
-                rankSource === src
-                  ? "bg-primary text-on-primary"
-                  : "bg-mantle text-subtext0 hover:bg-surface0"
-              }`}
-              aria-label={`Use ${src === "csrankings" ? "CSRankings" : "Niche"} rankings`}
-            >
-              {src === "csrankings" ? "CSRankings" : "Niche"}
-            </button>
-          ))}
+          <button
+            key="niche"
+            onClick={() => handleRankSourceChange("niche")}
+            title="Niche: student reviews covering academics, campus life, food, safety, and more"
+            className={`px-3 py-1 text-xs font-medium transition-colors ${
+              rankSource === "niche"
+                ? "bg-primary text-on-primary"
+                : "bg-mantle text-subtext0 hover:bg-surface0"
+            }`}
+            aria-label="Use Niche rankings"
+          >
+            Niche
+          </button>
+          <button
+            key="csrankings"
+            onClick={() => handleRankSourceChange("csrankings")}
+            title="CSRankings: based on faculty research publications — best for evaluating CS research strength"
+            className={`px-3 py-1 text-xs font-medium transition-colors ${
+              rankSource === "csrankings"
+                ? "bg-primary text-on-primary"
+                : "bg-mantle text-subtext0 hover:bg-surface0"
+            }`}
+            aria-label="Use CSRankings rankings"
+          >
+            CSRankings
+          </button>
         </div>
       </div>
 
