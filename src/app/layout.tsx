@@ -9,6 +9,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import SkipLink from "@/components/SkipLink";
 import LayoutContent from "@/components/LayoutContent";
 import CompareBar from "@/components/CompareBar";
+import CompareProvider from "@/components/CompareProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -50,15 +51,17 @@ export default function RootLayout({
       >
         <SkipLink />
         <ErrorBoundary>
-          <ChatProvider>
-            <LayoutContent>
-              <Navbar />
-              <main className="max-w-[960px] mx-auto px-8">{children}</main>
-            </LayoutContent>
-            <ChatButton />
-            <ChatDrawer />
-            <CompareBar />
-          </ChatProvider>
+          <CompareProvider>
+            <ChatProvider>
+              <LayoutContent>
+                <Navbar />
+                <main className="max-w-[960px] mx-auto px-8">{children}</main>
+              </LayoutContent>
+              <ChatButton />
+              <ChatDrawer />
+              <CompareBar />
+            </ChatProvider>
+          </CompareProvider>
         </ErrorBoundary>
       </body>
     </html>

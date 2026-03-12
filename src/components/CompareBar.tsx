@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useComparison } from "@/hooks/useComparison";
+import { useCompareContext } from "@/components/CompareProvider";
 
 function slugToName(slug: string): string {
   return slug
@@ -11,7 +11,7 @@ function slugToName(slug: string): string {
 }
 
 export default function CompareBar() {
-  const { slugs, remove, clear } = useComparison();
+  const { slugs, remove, clear } = useCompareContext();
 
   if (slugs.length === 0) return null;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useComparison } from "@/hooks/useComparison";
+import { useCompareContext } from "@/components/CompareProvider";
 import { cn } from "@/utils/cn";
 
 interface CompareButtonProps {
@@ -9,7 +9,7 @@ interface CompareButtonProps {
 }
 
 export default function CompareButton({ slug, name }: CompareButtonProps) {
-  const { toggle, isSelected, isFull } = useComparison();
+  const { toggle, isSelected, isFull } = useCompareContext();
   const selected = isSelected(slug);
   const disabled = !selected && isFull;
 
