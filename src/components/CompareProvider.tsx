@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 
 const MAX_COMPARE = 3;
 const STORAGE_KEY = "cspathfinder-compare";
@@ -45,7 +45,11 @@ export function useCompareContext() {
 }
 
 export default function CompareProvider({ children }: { children: ReactNode }) {
-  const [slugs, setSlugs] = useState<string[]>(readFromStorage);
+  const [slugs, setSlugs] = useState<string[]>([]);
+
+  // Hydrate from sessionStorage after mount to avoid SSR mismatch
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setSlugs(readFromStorage()), []);
 
   const add = useCallback((slug: string) => {
     setSlugs((prev) => {

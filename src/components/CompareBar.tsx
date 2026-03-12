@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useCompareContext } from "@/components/CompareProvider";
 
 function slugToName(slug: string): string {
@@ -12,8 +13,11 @@ function slugToName(slug: string): string {
 
 export default function CompareBar() {
   const { slugs, remove, clear } = useCompareContext();
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMounted(true), []);
 
-  if (slugs.length === 0) return null;
+  if (!mounted || slugs.length === 0) return null;
 
   const compareUrl = `/compare?schools=${slugs.join(",")}`;
 
