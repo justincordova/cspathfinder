@@ -349,6 +349,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
           )}
         </div>
         <Select
+          id="state-filter"
           value={stateFilter}
           onChange={(v) => updateFilter(setStateFilter, v)}
           placeholder="All States"
@@ -359,6 +360,7 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
           ]}
         />
         <Select
+          id="region-filter"
           value={regionFilter}
           onChange={(v) => updateFilter(setRegionFilter, v)}
           placeholder="All Regions"

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback, useId } from "react";
 import { cn } from "@/utils/cn";
 
 interface SelectProps {
+  id?: string;
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
@@ -12,13 +13,15 @@ interface SelectProps {
 }
 
 export default function Select({
+  id: externalId,
   value,
   onChange,
   options,
   placeholder = "Select...",
   "aria-label": ariaLabel,
 }: SelectProps) {
-  const id = useId();
+  const generatedId = useId();
+  const id = externalId ?? generatedId;
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
