@@ -19,7 +19,6 @@ interface ROIChartProps {
 export default function ROIChart({ schools }: ROIChartProps) {
   const data = schools
     .filter((s) => s.medianEarnings6yr != null && s.medianEarnings6yr > 0)
-    .slice(0, 15)
     .map((s) => ({
       name: s.name.length > 20 ? s.name.slice(0, 20) + "..." : s.name,
       inStateTuition: s.tuitionInState,

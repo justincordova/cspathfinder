@@ -32,10 +32,22 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       <button
         onClick={() => onPageChange(safeCurrentPage - 1)}
         disabled={safeCurrentPage <= 1}
-        className="px-3 py-2 rounded-lg bg-surface0 text-text hover:bg-surface1 transition-colors disabled:opacity-40 disabled:cursor-default text-sm"
+        className="px-3 py-2 rounded-lg bg-surface0 text-text hover:bg-surface1 transition-colors disabled:opacity-40 disabled:cursor-default"
         aria-label="Go to previous page"
       >
-        Prev
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
       </button>
       {withEllipsis.map((p, i) =>
         p === -1 ? (
@@ -61,10 +73,22 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       <button
         onClick={() => onPageChange(safeCurrentPage + 1)}
         disabled={safeCurrentPage >= safeTotalPages}
-        className="px-3 py-2 rounded-lg bg-surface0 text-text hover:bg-surface1 transition-colors disabled:opacity-40 disabled:cursor-default text-sm"
+        className="px-3 py-2 rounded-lg bg-surface0 text-text hover:bg-surface1 transition-colors disabled:opacity-40 disabled:cursor-default"
         aria-label="Go to next page"
       >
-        Next
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M9 18l6-6-6-6" />
+        </svg>
       </button>
     </nav>
   );

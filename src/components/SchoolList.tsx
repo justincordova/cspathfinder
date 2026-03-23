@@ -17,7 +17,12 @@ import Select from "./Select";
 const ROIChart = dynamic(() => import("./ROIChart"), { ssr: false });
 
 // Import filtering logic from client-safe filters.ts (NOT loadSchools.ts which uses Node.js fs)
-import { filterSchools, type SortField, type FilterResult } from "@/lib/data/filters";
+import {
+  filterSchools,
+  calculatePaybackYears,
+  type SortField,
+  type FilterResult,
+} from "@/lib/data/filters";
 import { formatCurrency, formatPercent } from "@/utils/format";
 
 interface SchoolListProps {
@@ -300,20 +305,6 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
     setPage(1);
   }, []);
 
-  const toggleSort = useCallback(
-    (key: SortField) => {
-      if (sortBy === key) {
-        setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-      } else {
-        const option = sortOptions.find((o) => o.value === key);
-        setSortBy(key);
-        setSortDir(option?.defaultDir ?? "desc");
-      }
-      setPage(1);
-    },
-    [sortBy, sortOptions]
-  );
-
   return (
     <div className="space-y-4">
       {/* Search + dropdowns */}
@@ -376,10 +367,28 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       <div className="flex items-center gap-1 text-sm">
         <span className="text-subtext0 font-medium mr-1">Ranking:</span>
         <div className="relative group flex items-center">
-          <span className="text-subtext0 cursor-help mr-1" aria-label="Ranking source info">
-            ⓘ
-          </span>
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-crust text-text text-xs rounded shadow-lg border border-surface0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 pointer-events-none text-center">
+          <button
+            type="button"
+            className="text-subtext0 hover:text-text transition-colors cursor-help mr-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+            aria-label="Ranking source info: Niche ranks based on student reviews; CSRankings ranks based on faculty research publications"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+          </button>
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-crust text-text text-xs rounded shadow-lg border border-surface0 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-10 pointer-events-none text-center">
             Niche ranks based on student reviews; CSRankings ranks based on faculty research
             publications
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-crust"></div>
@@ -415,27 +424,32 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
         </div>
       </div>
 
-      {/* Sort pills */}
-      <div className="flex items-start gap-2 flex-wrap text-sm">
-        <span className="text-subtext0 font-medium py-0.5 shrink-0">Sort:</span>
-        <div className="flex flex-wrap gap-1.5">
-          {sortOptions.map(({ value: key, label }) => (
-            <button
-              key={key}
-              onClick={() => toggleSort(key)}
-              className={`px-2.5 py-0.5 rounded-full transition-all duration-150 ease-out text-xs transform hover:scale-105 active:scale-95 ${
-                sortBy === key
-                  ? "bg-primary text-on-primary font-bold"
-                  : "bg-surface0 text-text hover:bg-surface1"
-              }`}
-              style={{ transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)" }}
-              aria-label={`Sort by ${label}${sortBy === key ? `, currently ${sortDir === "asc" ? "ascending" : "descending"}, click to reverse` : ""}`}
-            >
-              {label}
-              {sortBy === key && (sortDir === "asc" ? " ↑" : " ↓")}
-            </button>
-          ))}
-        </div>
+      {/* Sort dropdown + direction toggle */}
+      <div className="flex items-center gap-2 text-sm">
+        <span className="text-subtext0 font-medium shrink-0">Sort:</span>
+        <Select
+          id="sort-by"
+          value={sortBy}
+          onChange={(v) => {
+            const field = v as SortField;
+            const option = sortOptions.find((o) => o.value === field);
+            setSortBy(field);
+            setSortDir(option?.defaultDir ?? "desc");
+            setPage(1);
+          }}
+          options={sortOptions.map(({ value, label }) => ({ value, label }))}
+          aria-label="Sort by"
+        />
+        <button
+          onClick={() => {
+            setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+            setPage(1);
+          }}
+          className="px-3 py-2 rounded-lg border bg-mantle border-surface0 text-text hover:border-subtext0 hover:bg-surface0 transition-all duration-150 text-sm font-medium cursor-pointer"
+          aria-label={`Sort direction: ${sortDir === "asc" ? "ascending" : "descending"}, click to toggle`}
+        >
+          {sortDir === "asc" ? "↑" : "↓"}
+        </button>
       </div>
 
       {/* Results count */}
@@ -475,9 +489,9 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
           style={{ animation: "fadeInUp 0.3s ease-out" }}
         >
           <h2 className="text-sm font-bold text-subtext0 mb-4">
-            Tuition vs Median Earnings — top 15 matching schools
+            Tuition vs Median Earnings — current page
           </h2>
-          <ROIChart schools={allFiltered} />
+          <ROIChart schools={paginated} />
         </div>
       )}
 
@@ -503,83 +517,96 @@ export default function SchoolList({ csrankingsSchools, nicheSchools }: SchoolLi
       ) : (
         /* School cards */
         <div key={listKey} className="space-y-3">
-          {paginated.map((school, index) => (
-            <Link
-              key={school.slug}
-              href={`/school/${school.slug}`}
-              className="
-                block p-5 bg-mantle rounded-lg border border-surface0
-                hover:border-primary hover:shadow-[0_0_0_1px_var(--ctp-primary)]
-                hover:-translate-y-0.5 active:translate-y-0
-                transition-all duration-200 ease-out
-                transform hover:scale-[1.005] active:scale-[0.995]
-              "
-              style={{
-                transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
-                animationDelay: `${index * 30}ms`,
-                animation: `fadeInUp 0.3s ease-out ${index * 30}ms both`,
-              }}
-            >
-              <div className="flex items-start gap-4">
-                <SchoolLogo website={school.website} name={school.name} size={48} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-primary font-mono text-sm font-bold">
-                      {school[activeRankField] ? `#${school[activeRankField]}` : "—"}
-                    </span>
-                    <span className="font-semibold text-lg truncate">{school.name}</span>
+          {paginated.map((school, index) => {
+            const payback = calculatePaybackYears(school);
+            return (
+              <Link
+                key={school.slug}
+                href={`/school/${school.slug}`}
+                className="
+                  block p-5 bg-mantle rounded-lg border border-surface0
+                  hover:border-primary hover:shadow-[0_0_0_1px_var(--ctp-primary)]
+                  hover:-translate-y-0.5 active:translate-y-0
+                  transition-all duration-200 ease-out
+                  transform hover:scale-[1.005] active:scale-[0.995]
+                "
+                style={{
+                  transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
+                  animationDelay: `${index * 30}ms`,
+                  animation: `fadeInUp 0.3s ease-out ${index * 30}ms both`,
+                }}
+              >
+                <div className="flex items-start gap-4">
+                  <SchoolLogo website={school.website} name={school.name} size={48} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-primary font-mono text-sm font-bold">
+                        {school[activeRankField] ? `#${school[activeRankField]}` : "—"}
+                      </span>
+                      <span className="font-semibold text-lg truncate">{school.name}</span>
+                    </div>
+                    <p className="text-subtext0 text-sm">
+                      {school.city}, {school.state} · {school.region}
+                    </p>
+                    {/* Mobile: heart + compare */}
+                    <div className="sm:hidden flex items-center gap-2 mt-1">
+                      <HeartButton slug={school.slug} size="sm" />
+                      <CompareButton slug={school.slug} name={school.name} />
+                    </div>
+                    {/* Mobile: compact stats inline */}
+                    <div className="sm:hidden flex gap-3 text-xs text-subtext0 mt-1">
+                      <span className="text-peach">{formatCurrency(school.tuitionInState)}</span>
+                      <span className="text-green">{formatCurrency(school.medianEarnings6yr)}</span>
+                      {payback && <span className="text-blue">{payback.toFixed(1)}yr payback</span>}
+                    </div>
+                    <div className="flex flex-wrap gap-3 mt-3">
+                      <GradeBadge grade={school.nicheGrades.overall} label="Overall" />
+                      <GradeBadge grade={school.nicheGrades.academics} label="Academics" />
+                      <GradeBadge grade={school.nicheGrades.campusFood} label="Food" />
+                      <GradeBadge grade={school.nicheGrades.partyScene} label="Party" />
+                      <GradeBadge grade={school.nicheGrades.studentLife} label="Social" />
+                      <GradeBadge grade={school.nicheGrades.safety} label="Safety" />
+                    </div>
                   </div>
-                  <p className="text-subtext0 text-sm">
-                    {school.city}, {school.state} · {school.region}
-                  </p>
-                  {/* Mobile: heart + compare */}
-                  <div className="sm:hidden flex items-center gap-2 mt-1">
-                    <HeartButton slug={school.slug} size="sm" />
-                    <CompareButton slug={school.slug} name={school.name} />
-                  </div>
-                  {/* Mobile: compact stats inline */}
-                  <div className="sm:hidden flex gap-3 text-xs text-subtext0 mt-1">
-                    <span>Tuition: {formatCurrency(school.tuitionInState)}</span>
-                    <span className="text-green">{formatCurrency(school.medianEarnings6yr)}</span>
-                    <span>{formatPercent(school.acceptanceRate)} accept</span>
-                  </div>
-                  <div className="flex flex-wrap gap-3 mt-3">
-                    <GradeBadge grade={school.nicheGrades.overall} label="Overall" />
-                    <GradeBadge grade={school.nicheGrades.academics} label="Academics" />
-                    <GradeBadge grade={school.nicheGrades.campusFood} label="Food" />
-                    <GradeBadge grade={school.nicheGrades.partyScene} label="Party" />
-                    <GradeBadge grade={school.nicheGrades.studentLife} label="Social" />
-                    <GradeBadge grade={school.nicheGrades.safety} label="Safety" />
+                  {/* Desktop: stacked right-aligned stats */}
+                  <div className="hidden sm:block text-right text-sm space-y-1 shrink-0">
+                    <div className="flex justify-end gap-2 mb-1">
+                      <CompareButton slug={school.slug} name={school.name} />
+                      <HeartButton slug={school.slug} size="sm" />
+                    </div>
+                    <div>
+                      <span className="text-subtext0">In-state: </span>
+                      <span className="font-medium text-peach">
+                        {formatCurrency(school.tuitionInState)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-subtext0">Out-of-state: </span>
+                      <span className="font-medium text-peach">
+                        {formatCurrency(school.tuitionOutOfState)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-subtext0">Earnings: </span>
+                      <span className="font-medium text-green">
+                        {formatCurrency(school.medianEarnings6yr)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-subtext0">Accept: </span>
+                      <span className="font-medium">{formatPercent(school.acceptanceRate)}</span>
+                    </div>
+                    {payback && (
+                      <div>
+                        <span className="text-subtext0">Payback: </span>
+                        <span className="font-medium text-blue">{payback.toFixed(1)}yr</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                {/* Desktop: stacked right-aligned stats */}
-                <div className="hidden sm:block text-right text-sm space-y-1 shrink-0">
-                  <div className="flex justify-end gap-2 mb-1">
-                    <CompareButton slug={school.slug} name={school.name} />
-                    <HeartButton slug={school.slug} size="sm" />
-                  </div>
-                  <div>
-                    <span className="text-subtext0">In-state: </span>
-                    <span className="font-medium">{formatCurrency(school.tuitionInState)}</span>
-                  </div>
-                  <div>
-                    <span className="text-subtext0">Out-of-state: </span>
-                    <span className="font-medium">{formatCurrency(school.tuitionOutOfState)}</span>
-                  </div>
-                  <div>
-                    <span className="text-subtext0">Earnings: </span>
-                    <span className="font-medium text-green">
-                      {formatCurrency(school.medianEarnings6yr)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-subtext0">Accept: </span>
-                    <span className="font-medium">{formatPercent(school.acceptanceRate)}</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
 

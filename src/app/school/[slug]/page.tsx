@@ -44,31 +44,63 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
   const rawPayback = calculatePaybackYears(school);
   const paybackYears = rawPayback !== null ? rawPayback.toFixed(1) : null;
 
-  const stats: { label: string; value: string }[] = [
-    { label: "CSRankings", value: school.csRanking ? `#${school.csRanking}` : "N/A" },
-    { label: "Niche CS", value: school.nicheRanking ? `#${school.nicheRanking}` : "N/A" },
-    { label: "In-State Tuition", value: formatCurrency(school.tuitionInState) },
-    { label: "Out-of-State Tuition", value: formatCurrency(school.tuitionOutOfState) },
-    { label: "Room & Board", value: formatCurrency(school.roomAndBoard) },
+  const financialStats: { label: string; value: string; color: string }[] = [
     {
-      label: "Median Earnings (6yr after enrollment)",
-      value: school.medianEarnings6yr ? formatCurrency(school.medianEarnings6yr) : "—",
+      label: "In-State Tuition",
+      value: formatCurrency(school.tuitionInState),
+      color: "text-peach",
     },
-    { label: "Median Debt", value: school.medianDebt ? formatCurrency(school.medianDebt) : "—" },
-    { label: "Acceptance Rate", value: formatPercent(school.acceptanceRate) },
-    { label: "Graduation Rate", value: formatPercent(school.graduationRate) },
-    { label: "Enrollment", value: school.enrollment.toLocaleString("en-US") },
+    {
+      label: "Out-of-State Tuition",
+      value: formatCurrency(school.tuitionOutOfState),
+      color: "text-peach",
+    },
+    { label: "Room & Board", value: formatCurrency(school.roomAndBoard), color: "text-text" },
+    ...(totalCostInState > 0
+      ? [
+          {
+            label: "4-Year Total (In-State)",
+            value: formatCurrency(totalCostInState),
+            color: "text-peach",
+          },
+        ]
+      : []),
+    ...(totalCostOutOfState > 0
+      ? [
+          {
+            label: "4-Year Total (Out-of-State)",
+            value: formatCurrency(totalCostOutOfState),
+            color: "text-peach",
+          },
+        ]
+      : []),
+    {
+      label: "Median Debt",
+      value: school.medianDebt ? formatCurrency(school.medianDebt) : "—",
+      color: "text-red",
+    },
+    {
+      label: "Median Earnings (6yr)",
+      value: school.medianEarnings6yr ? formatCurrency(school.medianEarnings6yr) : "—",
+      color: "text-green",
+    },
   ];
 
-  if (totalCostInState > 0) {
-    stats.push({ label: "Total 4-Year Cost (In-State)", value: formatCurrency(totalCostInState) });
-  }
-  if (totalCostOutOfState > 0) {
-    stats.push({
-      label: "Total 4-Year Cost (Out-of-State)",
-      value: formatCurrency(totalCostOutOfState),
-    });
-  }
+  const admissionStats: { label: string; value: string; color: string }[] = [
+    {
+      label: "CSRankings",
+      value: school.csRanking ? `#${school.csRanking}` : "N/A",
+      color: "text-primary",
+    },
+    {
+      label: "Niche CS Rank",
+      value: school.nicheRanking ? `#${school.nicheRanking}` : "N/A",
+      color: "text-primary",
+    },
+    { label: "Acceptance Rate", value: formatPercent(school.acceptanceRate), color: "text-text" },
+    { label: "Graduation Rate", value: formatPercent(school.graduationRate), color: "text-green" },
+    { label: "Enrollment", value: school.enrollment.toLocaleString("en-US"), color: "text-text" },
+  ];
 
   return (
     <PageTransition>
@@ -106,12 +138,24 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
         </section>
 
         <section>
-          <h2 className="text-xl font-bold mb-4">Key Statistics</h2>
+          <h2 className="text-xl font-bold mb-4">Financials</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {stats.map((stat) => (
+            {financialStats.map((stat) => (
               <div key={stat.label} className="p-4 bg-mantle rounded-lg border border-surface0">
                 <div className="text-sm text-subtext0 mb-1">{stat.label}</div>
-                <div className="text-xl font-bold">{stat.value}</div>
+                <div className={`text-xl font-bold ${stat.color}`}>{stat.value}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-bold mb-4">Rankings &amp; Admissions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {admissionStats.map((stat) => (
+              <div key={stat.label} className="p-4 bg-mantle rounded-lg border border-surface0">
+                <div className="text-sm text-subtext0 mb-1">{stat.label}</div>
+                <div className={`text-xl font-bold ${stat.color}`}>{stat.value}</div>
               </div>
             ))}
           </div>
